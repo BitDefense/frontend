@@ -2,13 +2,18 @@
   "tasks": [
     {
       "id": "task-1",
-      "text": "Refine handleDrop Logic to prevent automatic transition",
-      "status": "done"
+      "text": "Cleanup: Remove legacy ActionNode",
+      "status": "todo"
     },
     {
       "id": "task-2",
-      "text": "Implement Button Validation and UI Feedback in renderInputStep",
-      "status": "done"
+      "text": "Implement ContextMenu component",
+      "status": "todo"
+    },
+    {
+      "id": "task-3",
+      "text": "Integrate Context Menu and Edge-creation into FlowCanvas",
+      "status": "todo"
     }
   ]
 }

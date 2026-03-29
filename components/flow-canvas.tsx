@@ -5,12 +5,10 @@ import { ReactFlow, addEdge, Background, useNodesState, useEdgesState, Connectio
 import '@xyflow/react/dist/style.css';
 
 import { AddNewContractNode } from '@/components/nodes/add-new-contract-node';
-import { ActionNode } from '@/components/nodes/action-node';
 import { InvariantNode } from '@/components/nodes/invariant-node';
 
 const nodeTypes = {
   addNewContract: AddNewContractNode,
-  action: ActionNode,
   invariant: InvariantNode,
 };
 

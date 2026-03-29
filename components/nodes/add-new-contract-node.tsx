@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Handle, Position } from '@xyflow/react';
+import React, { useState, useEffect } from 'react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Network, Search, Upload, Check, X, ChevronDown, ArrowRight, ArrowLeft, Plus } from 'lucide-react';
 import { parseSolidityVariables } from '@/lib/solidity-parser';
 
@@ -12,21 +12,35 @@ export interface ContractData {
   network: string;
   source: 'etherscan' | 'file' | null;
   code: string;
-  variables: string[];
+  variables: { name: string; type: string }[];
   mappings: Record<string, string>;
 }
 
-export function AddNewContractNode() {
+export function AddNewContractNode({ id, data: initialData }: { id: string, data: any }) {
   const [step, setStep] = useState<WizardStep>('SOURCE');
   const [isDragging, setIsDragging] = useState(false);
+  const { setNodes } = useReactFlow();
+
   const [data, setData] = useState<ContractData>({
-    address: '',
-    network: 'ethereum',
-    source: null,
-    code: '',
-    variables: [],
-    mappings: {}
+    address: initialData?.address || '',
+    network: initialData?.network || 'ethereum',
+    source: initialData?.source || null,
+    code: initialData?.code || '',
+    variables: initialData?.variables || [],
+    mappings: initialData?.mappings || {}
   });
+
+  // Sync internal state back to React Flow node data
+  useEffect(() => {
+    setNodes((nodes) =>
+      nodes.map((node) => {
+        if (node.id === id) {
+          return { ...node, data: { ...node.data, ...data } };
+        }
+        return node;
+      })
+    );
+  }, [data, id, setNodes]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -61,7 +75,7 @@ export function AddNewContractNode() {
 
   const renderSourceStep = () => (
     <div className="p-6 space-y-4">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-2">Select Source</div>
+      <div className="text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-2 px-1">Select Source</div>
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => { setData(prev => ({ ...prev, source: 'etherscan' })); setStep('INPUT'); }}
@@ -135,7 +149,7 @@ export function AddNewContractNode() {
           onClick={() => {
             if (data.source === 'etherscan') {
               // Simulated fetch of Example contract
-              const exampleCode = `contract Example { public uint256 totalSupply; constructor() { totalSupply = 1 ether; } }`;
+              const exampleCode = `contract Example { uint256 public totalSupply; constructor() { totalSupply = 1 ether; } }`;
               const vars = parseSolidityVariables(exampleCode);
               setData(prev => ({ ...prev, code: exampleCode, variables: vars }));
             }
@@ -151,21 +165,21 @@ export function AddNewContractNode() {
 
   const renderMappingStep = () => (
     <div className="p-6 space-y-6">
-      <div className="text-[10px] uppercase tracking-widest text-[#919191]">Map Storage Variables</div>
-      <div className="max-h-48 overflow-y-auto space-y-3 scrollbar-hide">
+      <div className="text-[10px] uppercase tracking-widest text-[#919191] px-1">Map Storage Variables</div>
+      <div className="max-h-48 overflow-y-auto space-y-3 scrollbar-hide px-1">
         {data.variables.length === 0 ? (
           <div className="text-[10px] text-[#919191] italic py-4 text-center">No variables detected in source code.</div>
         ) : (
           data.variables.map(v => (
-            <div key={v} className="flex items-center gap-4 bg-black/20 p-3 border border-white/5">
-              <div className="text-[10px] font-mono text-white flex-1 truncate">{v}</div>
+            <div key={v.name} className="flex items-center gap-4 bg-black/20 p-3 border border-white/5">
+              <div className="text-[10px] font-mono text-white flex-1 truncate">{v.name} <span className="text-[9px] text-white/30">({v.type})</span></div>
               <input
                 placeholder="0x Hash"
                 className="w-32 bg-black/60 border border-white/10 p-1.5 text-[9px] font-mono text-white focus:border-white/30 outline-none"
-                value={data.mappings[v] || ''}
+                value={data.mappings[v.name] || ''}
                 onChange={(e) => setData(prev => ({
                   ...prev,
-                  mappings: { ...prev.mappings, [v]: e.target.value }
+                  mappings: { ...prev.mappings, [v.name]: e.target.value }
                 }))}
               />
             </div>
