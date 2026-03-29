@@ -156,6 +156,12 @@ export function AddNewContractNode() {
 
   return (
     <div className="relative w-96 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl rounded-none overflow-hidden">
+      <div className="bg-[#353535]/50 p-4 flex items-center justify-between border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <Plus className="w-4 h-4 text-white" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">ADD NEW CONTRACT</span>
+        </div>
+      </div>
       {step === 'SOURCE' && renderSourceStep()}
       {step === 'INPUT' && renderInputStep()}
       {step === 'MAPPING' && renderMappingStep()}
