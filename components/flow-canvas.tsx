@@ -4,16 +4,16 @@ import React, { useCallback } from 'react';
 import { ReactFlow, addEdge, Background, useNodesState, useEdgesState, Connection, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { ImportContractNode } from '@/components/nodes/import-contract-node';
+import { AddNewContractNode } from '@/components/nodes/add-new-contract-node';
 import { ActionNode } from '@/components/nodes/action-node';
 
 const nodeTypes = {
-  importContract: ImportContractNode,
+  addNewContract: AddNewContractNode,
   action: ActionNode,
 };
 
 const initialNodes = [
-  { id: 'node-1', type: 'importContract', position: { x: 100, y: 200 }, data: {} },
+  { id: 'node-1', type: 'addNewContract', position: { x: 100, y: 200 }, data: {} },
   { id: 'node-2', type: 'action', position: { x: 600, y: 250 }, data: {} },
 ];
 
@@ -34,7 +34,7 @@ export function FlowCanvas() {
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onEdgesChange={onNodesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         fitView
