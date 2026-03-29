@@ -63,14 +63,14 @@ export function AddNewContractNode() {
       <div className="text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-2">Select Source</div>
       <div className="grid grid-cols-2 gap-3">
         <button 
-          onClick={() => { setData({...data, source: 'etherscan'}); setStep('INPUT'); }}
+          onClick={() => { setData(prev => ({...prev, source: 'etherscan'})); setStep('INPUT'); }}
           className="flex flex-col items-center gap-3 p-6 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-full"
         >
           <Search className="w-5 h-5 text-white" />
           <span className="text-[9px] font-mono uppercase tracking-widest text-white">Etherscan</span>
         </button>
         <button 
-          onClick={() => { setData({...data, source: 'file'}); setStep('INPUT'); }}
+          onClick={() => { setData(prev => ({...prev, source: 'file'})); setStep('INPUT'); }}
           className="flex flex-col items-center gap-3 p-6 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-full"
         >
           <Upload className="w-5 h-5 text-white" />
@@ -95,12 +95,12 @@ export function AddNewContractNode() {
             placeholder="Contract Address"
             className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white focus:outline-none focus:border-white/20"
             value={data.address}
-            onChange={(e) => setData({...data, address: e.target.value})}
+            onChange={(e) => setData(prev => ({...prev, address: e.target.value}))}
           />
           <select 
             className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white appearance-none"
             value={data.network}
-            onChange={(e) => setData({...data, network: e.target.value})}
+            onChange={(e) => setData(prev => ({...prev, network: e.target.value}))}
           >
             <option value="ethereum">Ethereum Mainnet</option>
             <option value="polygon">Polygon</option>
@@ -117,7 +117,9 @@ export function AddNewContractNode() {
             className={`border border-dashed p-8 text-[10px] text-center uppercase tracking-widest transition-all ${
               isDragging 
                 ? 'border-white/40 bg-white/5 text-white' 
-                : 'border-white/10 text-[#919191]'
+                : data.code
+                  ? 'border-green-500/30 bg-green-500/5 text-white'
+                  : 'border-white/10 text-[#919191]'
             }`}
           >
             {data.code ? (
@@ -139,7 +141,7 @@ export function AddNewContractNode() {
               // Simulated fetch of Example contract
               const exampleCode = `contract Example { public uint256 totalSupply; constructor() { totalSupply = 1 ether; } }`;
               const vars = parseSolidityVariables(exampleCode);
-              setData({...data, code: exampleCode, variables: vars});
+              setData(prev => ({...prev, code: exampleCode, variables: vars}));
             }
             setStep('MAPPING');
           }}
@@ -165,10 +167,10 @@ export function AddNewContractNode() {
                 placeholder="0x Hash"
                 className="w-32 bg-black/60 border border-white/10 p-1.5 text-[9px] font-mono text-white focus:border-white/30 outline-none"
                 value={data.mappings[v] || ''}
-                onChange={(e) => setData({
-                  ...data, 
-                  mappings: {...data.mappings, [v]: e.target.value}
-                })}
+                onChange={(e) => setData(prev => ({
+                  ...prev, 
+                  mappings: {...prev.mappings, [v]: e.target.value}
+                }))}
               />
             </div>
           ))
