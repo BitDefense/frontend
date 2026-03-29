@@ -148,9 +148,20 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
 
   const renderSaved = () => (
     <>
-      <div className="p-4 bg-blue-500/10 border-b border-blue-500/20 flex items-center gap-3">
-        <Shield className="w-4 h-4 text-blue-400" />
-        <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Invariant Active</span>
+      <div className="bg-blue-500/10 p-4 border-b border-blue-500/20 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Shield className="w-4 h-4 text-blue-400" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">Invariant Active</span>
+        </div>
+        <button
+          onClick={() => {
+            setStep('SELECT_VAR');
+            setThreshold(null);
+          }}
+          className="text-[9px] text-[#919191] hover:text-white uppercase"
+        >
+          Edit
+        </button>
       </div>
 
       <div className="p-6">
@@ -162,16 +173,6 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
             <span className="text-white">{threshold}</span>
           </div>
         </div>
-
-        <button
-          onClick={() => {
-            setStep('SELECT_VAR');
-            setThreshold(null);
-          }}
-          className="w-full mt-6 flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest text-white transition-all"
-        >
-          Edit Invariant
-        </button>
       </div>
     </>
   );
