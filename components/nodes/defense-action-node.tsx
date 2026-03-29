@@ -253,19 +253,21 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
   );
 
   return (
-    <div className="relative w-80 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl group rounded-none">
+    <div className="relative w-96 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl group rounded-none">
       <Handle
         type="target"
         position={Position.Left}
         className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all left-[-6px]"
       />
 
-      <div className="bg-[#353535]/50 p-4 flex items-center justify-between border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <ShieldAlert className="w-4 h-4 text-red-500" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">ADD DEFENSE ACTION</span>
+      {step !== 'SAVED' && (
+        <div className="bg-[#353535]/50 p-4 flex items-center justify-between border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="w-4 h-4 text-white" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">ADD DEFENSE ACTION</span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="min-h-[100px]">
         {step === 'SELECT_TYPE' && renderSelectType()}
