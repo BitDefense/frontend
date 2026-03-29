@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "task-1",
+      "text": "Refine handleDrop Logic to prevent automatic transition",
+      "status": "done"
+    },
+    {
+      "id": "task-2",
+      "text": "Implement Button Validation and UI Feedback in renderInputStep",
+      "status": "done"
+    }
+  ]
+}

@@ -63,10 +63,10 @@ const DashboardFooter = () => (
           <Maximize className="w-4 h-4 text-white" />
         </button>
       </div>
-      <button className="pointer-events-auto bg-white text-black h-12 px-8 flex items-center gap-3 hover:bg-white/90 active:scale-95 transition-all">
+      {/* <button className="pointer-events-auto bg-white text-black h-12 px-8 flex items-center gap-3 hover:bg-white/90 active:scale-95 transition-all">
         <Play className="w-3 h-3 fill-black" />
         <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Execute Flow</span>
-      </button>
+      </button> */}
     </div>
     {/* <div className="flex flex-col items-end gap-2 pointer-events-auto text-[10px] uppercase tracking-[0.2em]">
       <div className="flex items-center gap-6 text-gray-400">

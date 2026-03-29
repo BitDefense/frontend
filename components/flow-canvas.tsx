@@ -14,7 +14,6 @@ const nodeTypes = {
 
 const initialNodes = [
   { id: 'node-1', type: 'addNewContract', position: { x: 100, y: 200 }, data: {} },
-  { id: 'node-2', type: 'action', position: { x: 600, y: 250 }, data: {} },
 ];
 
 const initialEdges: Edge[] = [];
@@ -34,14 +33,14 @@ export function FlowCanvas() {
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
-        onEdgesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
-        fitView
+        fitView={false}
         className="bg-[#131313]"
       >
         <Background color="rgba(255, 255, 255, 0.05)" gap={40} size={1} />
       </ReactFlow>
-    </div>
+    </div >
   );
 }
