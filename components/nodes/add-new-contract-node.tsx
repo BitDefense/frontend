@@ -18,6 +18,7 @@ export interface ContractData {
 
 export function AddNewContractNode() {
   const [step, setStep] = useState<WizardStep>('SOURCE');
+  const [isDragging, setIsDragging] = useState(false);
   const [data, setData] = useState<ContractData>({
     address: '',
     network: 'ethereum',
@@ -26,6 +27,38 @@ export function AddNewContractNode() {
     variables: [],
     mappings: {}
   });
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.sol')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        const vars = parseSolidityVariables(content);
+        setData({
+          ...data,
+          source: 'file',
+          code: content,
+          variables: vars,
+          address: file.name
+        });
+        setStep('MAPPING');
+      };
+      reader.readAsText(file);
+    }
+  };
 
   const renderSourceStep = () => (
     <div className="p-6 space-y-4">
@@ -95,8 +128,17 @@ export function AddNewContractNode() {
           <button onClick={() => setStep('SOURCE')}><ArrowLeft className="w-3 h-3"/></button>
           File Upload
         </div>
-        <div className="border border-dashed border-white/10 p-12 text-[10px] text-[#919191] uppercase tracking-widest">
-          Drag & Drop .sol
+        <div 
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`border border-dashed p-12 text-[10px] uppercase tracking-widest transition-all ${
+            isDragging 
+              ? 'border-white/40 bg-white/5 text-white' 
+              : 'border-white/10 text-[#919191]'
+          }`}
+        >
+          {isDragging ? 'Drop to upload' : 'Drag & Drop .sol'}
         </div>
       </div>
     );
@@ -154,28 +196,30 @@ export function AddNewContractNode() {
     </div>
   );
 
-  return (
-    <div className="relative w-96 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl rounded-none overflow-hidden">
-      <div className="bg-[#353535]/50 p-4 flex items-center justify-between border-b border-white/10">
+  const renderHeader = () => {
+    if (step === 'SAVED') return null;
+    return (
+      <div className="bg-[#353535]/50 p-4 flex items-center border-b border-white/10">
         <div className="flex items-center gap-3">
           <Plus className="w-4 h-4 text-white" />
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">ADD NEW CONTRACT</span>
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="relative w-96 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl rounded-none group">
+      {renderHeader()}
       {step === 'SOURCE' && renderSourceStep()}
       {step === 'INPUT' && renderInputStep()}
       {step === 'MAPPING' && renderMappingStep()}
       {step === 'SAVED' && renderSavedStep()}
-      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-[#131313] border border-white !rounded-none" />
-    </div>
-  );
-}
-div>
-      {step === 'SOURCE' && renderSourceStep()}
-      {step === 'INPUT' && renderInputStep()}
-      {step === 'MAPPING' && renderMappingStep()}
-      {step === 'SAVED' && renderSavedStep()}
-      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-[#131313] border border-white !rounded-none" />
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all right-[-6px]" 
+      />
     </div>
   );
 }
