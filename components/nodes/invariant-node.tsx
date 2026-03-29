@@ -1,17 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, ArrowLeft, ChevronRight } from 'lucide-react';
-import { Handle, Position, useHandleConnections, useNodesData } from '@xyflow/react';
+import { Handle, Position, useHandleConnections, useNodesData, useReactFlow } from '@xyflow/react';
 
 export type InvariantStep = 'SELECT_VAR' | 'VARIABLE_TYPE' | 'OPERATOR' | 'THRESHOLD' | 'SAVED';
 
-export function InvariantNode() {
-  const [step, setStep] = useState<InvariantStep>('SELECT_VAR');
-  const [selectedVar, setSelectedVar] = useState<string | null>(null);
-  const [selectedVarType, setSelectedVarType] = useState<string | null>(null);
-  const [operator, setOperator] = useState<string | null>(null);
-  const [threshold, setThreshold] = useState<string | null>(null);
+export function InvariantNode({ id, data: initialData }: { id: string, data: any }) {
+  const [step, setStep] = useState<InvariantStep>(initialData?.step || 'SELECT_VAR');
+  const [selectedVar, setSelectedVar] = useState<string | null>(initialData?.selectedVar || null);
+  const [selectedVarType, setSelectedVarType] = useState<string | null>(initialData?.selectedVarType || null);
+  const [operator, setOperator] = useState<string | null>(initialData?.operator || null);
+  const [threshold, setThreshold] = useState<string | null>(initialData?.threshold || null);
+
+  const { setNodes } = useReactFlow();
+
+  // Sync internal state back to React Flow node data
+  useEffect(() => {
+    setNodes((nodes) =>
+      nodes.map((node) => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              selectedVar,
+              selectedVarType,
+              operator,
+              threshold,
+              step
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, selectedVar, selectedVarType, operator, threshold, step, setNodes]);
 
   const connections = useHandleConnections({
     type: 'target',
