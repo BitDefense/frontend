@@ -5,7 +5,7 @@ export function Protocols() {
     {
       icon: <Lock className="w-5 h-5 text-white mb-12" strokeWidth={1.5} />,
       title: 'Permissionless',
-      desc: 'No KYC. No sales calls. No gatekeeping. Kinetic Vault is accessible to any protocol or user through direct smart contract interaction.',
+      desc: 'No KYC. No sales calls. No gatekeeping. BitDefense is accessible to any protocol or user through direct smart contract interaction.',
       status: 'Access_Granted_'
     },
     {
@@ -25,7 +25,7 @@ export function Protocols() {
   return (
     <section className="px-6 py-24 md:px-12 md:py-32 max-w-[1600px] mx-auto">
       <h2 className="text-4xl md:text-6xl font-black leading-[0.9] tracking-[-0.03em] uppercase mb-16">
-        Core Protocols
+        Features By Design
       </h2>
 
       <div className="grid md:grid-cols-3 gap-6">

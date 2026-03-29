@@ -20,13 +20,7 @@ const FlowCanvas = dynamic(() => import('@/components/flow-canvas').then(mod => 
 const DashboardHeader = () => (
   <header className="fixed top-0 left-0 right-0 z-50 p-8 pointer-events-none flex justify-between items-start">
     <div className="pointer-events-auto flex flex-col gap-1">
-      <div className="text-2xl font-bold tracking-tighter text-white uppercase">VAULT_PROTOCOL</div>
-      <div className="flex gap-6 mt-2">
-        <Link href="/dashboard" className="text-[10px] font-bold uppercase tracking-widest text-white border-b border-white pb-1">Dashboard</Link>
-        <Link href="/" className="text-[10px] font-medium uppercase tracking-widest text-gray-500 hover:text-white transition-colors">Home</Link>
-        <Link href="#" className="text-[10px] font-medium uppercase tracking-widest text-gray-500 hover:text-white transition-colors">Github</Link>
-        <Link href="#" className="text-[10px] font-medium uppercase tracking-widest text-gray-500 hover:text-white transition-colors">Whitepaper</Link>
-      </div>
+      <Link href="/" className="text-2xl font-bold tracking-tighter text-white uppercase">BITDEFENSE*</Link>
     </div>
     <div className="flex items-center gap-6 pointer-events-auto">
       <div className="flex items-center bg-[#1b1b1b]/80 backdrop-blur-md border border-white/10 px-4 py-2 gap-3">
@@ -41,11 +35,11 @@ const DashboardHeader = () => (
           <Terminal className="w-4 h-4 text-white" />
         </button>
         <div className="w-10 h-10 bg-[#1b1b1b]/80 backdrop-blur-md border border-white/10 p-1 relative">
-          <Image 
-            alt="Security Operator" 
+          <Image
+            alt="Security Operator"
             fill
-            className="object-cover grayscale" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF0lvmAkNSJGbFMg09zSc_G0lUNcdw7Gv5I_YPUwLcksTXtjV7-xWTPiRvGZqNqnsF2CfcZPBCtpEkIlzE-XKYGKmYyw9WuGpsyxtDhv5bfssMBxcqDKSh0u3P_p8bmpia8wqq5B_Sx_7-KCicykpsX8orS11FrEjRI_hkK_0JyW7uOWdl42OdbLNQjl6waatLwpkBz2shvY3VJiTK_Etbyi5DlNRV47Q1Uo6A4O-ManJDGYseQalD-lUzzTQx0KFnrD9shpX3OPAG" 
+            className="object-cover grayscale"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF0lvmAkNSJGbFMg09zSc_G0lUNcdw7Gv5I_YPUwLcksTXtjV7-xWTPiRvGZqNqnsF2CfcZPBCtpEkIlzE-XKYGKmYyw9WuGpsyxtDhv5bfssMBxcqDKSh0u3P_p8bmpia8wqq5B_Sx_7-KCicykpsX8orS11FrEjRI_hkK_0JyW7uOWdl42OdbLNQjl6waatLwpkBz2shvY3VJiTK_Etbyi5DlNRV47Q1Uo6A4O-ManJDGYseQalD-lUzzTQx0KFnrD9shpX3OPAG"
             referrerPolicy="no-referrer"
           />
         </div>
@@ -74,7 +68,7 @@ const DashboardFooter = () => (
         <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Execute Flow</span>
       </button>
     </div>
-    <div className="flex flex-col items-end gap-2 pointer-events-auto text-[10px] uppercase tracking-[0.2em]">
+    {/* <div className="flex flex-col items-end gap-2 pointer-events-auto text-[10px] uppercase tracking-[0.2em]">
       <div className="flex items-center gap-6 text-gray-400">
         <span>© 2024 TACTICAL_VAULT_SECURITY_PROTOCOL</span>
         <span className="text-white">V2.0.4-LATEST</span>
@@ -83,7 +77,7 @@ const DashboardFooter = () => (
         <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
         Status: <span className="text-white">Encrypted</span>
       </div>
-    </div>
+    </div> */}
   </div>
 );
 
