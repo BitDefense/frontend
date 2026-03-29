@@ -81,15 +81,15 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
           onClick={() => { setData(prev => ({ ...prev, source: 'etherscan' })); setStep('INPUT'); }}
           className="flex flex-col items-center gap-3 p-6 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-full"
         >
-          <Search className="w-5 h-5 text-white" />
-          <span className="text-[9px] font-mono uppercase tracking-widest text-white">Etherscan</span>
+          <Search className="w-4 h-4 text-white" />
+          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white">Etherscan</span>
         </button>
         <button
           onClick={() => { setData(prev => ({ ...prev, source: 'file' })); setStep('INPUT'); }}
           className="flex flex-col items-center gap-3 p-6 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-full"
         >
-          <Upload className="w-5 h-5 text-white" />
-          <span className="text-[9px] font-mono uppercase tracking-widest text-white">Local File</span>
+          <Upload className="w-4 h-4 text-white" />
+          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white">Local File</span>
         </button>
       </div>
     </div>
@@ -99,7 +99,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
     const isInputValid = data.address.trim() !== '' && (data.source === 'etherscan' || !!data.code);
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191]">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#919191]">
           <button onClick={() => setStep('SOURCE')}><ArrowLeft className="w-3 h-3" /></button>
           {data.source === 'etherscan' ? 'Etherscan Details' : 'Local File Details'}
         </div>
@@ -126,7 +126,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`border border-dashed p-8 text-[10px] text-center uppercase tracking-widest transition-all ${isDragging
+            className={`border border-dashed p-8 text-[10px] text-center uppercase tracking-[0.2em] transition-all ${isDragging
               ? 'border-white/40 bg-white/5 text-white'
               : data.code
                 ? 'border-green-500/30 bg-green-500/5 text-white'
@@ -165,7 +165,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
 
   const renderMappingStep = () => (
     <div className="p-6 space-y-6">
-      <div className="text-[10px] uppercase tracking-widest text-[#919191] px-1">Map Storage Variables</div>
+      <div className="text-[10px] uppercase tracking-[0.2em] text-[#919191] px-1">Map Storage Variables</div>
       <div className="max-h-48 overflow-y-auto space-y-3 scrollbar-hide px-1">
         {data.variables.length === 0 ? (
           <div className="text-[10px] text-[#919191] italic py-4 text-center">No variables detected in source code.</div>

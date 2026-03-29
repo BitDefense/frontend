@@ -72,7 +72,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
           ))
         ) : (
           <div className="p-8 text-center border border-dashed border-white/10 bg-white/[0.02]">
-            <p className="text-[10px] text-[#919191] uppercase tracking-widest leading-relaxed">
+            <p className="text-[10px] text-[#919191] uppercase tracking-[0.2em] leading-relaxed">
               Connect a Contract node<br />to select variables.
             </p>
           </div>
@@ -85,7 +85,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
     const operators = ['>=', '<=', '==', '!=', '>', '<'];
     return (
       <div className="p-6 space-y-4">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191] mb-2 px-1">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-2 px-1">
           <button
             onClick={() => setStep('SELECT_VAR')}
             className="hover:text-white transition-colors p-1 -ml-1"
@@ -114,7 +114,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
 
   const renderSetThreshold = () => (
     <div className="p-6 space-y-4">
-      <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191] mb-4 px-1">
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-4 px-1">
         <button
           onClick={() => setStep('OPERATOR')}
           className="hover:text-white transition-colors p-1 -ml-1"
@@ -166,7 +166,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
 
       <div className="p-6">
         <div className="p-4 bg-white/5 border border-white/10 flex flex-col gap-2">
-          <div className="text-[10px] uppercase tracking-widest text-[#919191]">Current Rule</div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-[#919191]">Current Rule</div>
           <div className="text-[13px] font-mono text-white flex items-center gap-2 flex-wrap">
             <span className="text-blue-400">{selectedVar}</span>
             <span className="text-[#919191]">{operator}</span>
