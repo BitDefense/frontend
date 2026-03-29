@@ -139,7 +139,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
       <button
         disabled={!threshold}
         onClick={() => setStep('SAVED')}
-        className="w-full mt-4 bg-white text-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-200 disabled:opacity-50 transition-colors"
+        className="w-full mt-4 bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-200 disabled:opacity-50 transition-colors"
       >
         Finish
       </button>
@@ -158,7 +158,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
             setStep('SELECT_VAR');
             setThreshold(null);
           }}
-          className="text-[9px] text-[#919191] hover:text-white uppercase"
+          className="text-[9px] text-[#919191] hover:text-white uppercase tracking-[0.2em]"
         >
           Edit
         </button>

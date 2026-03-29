@@ -33,7 +33,7 @@ const OPTIONS: MenuOption[] = [
   },
   {
     id: 'defenseAction',
-    label: 'Defense Action',
+    label: 'Add Defense Action',
     icon: ShieldAlert,
     allowedFrom: ['canvas', 'invariant']
   }

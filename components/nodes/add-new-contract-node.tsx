@@ -155,7 +155,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
             }
             setStep('MAPPING');
           }}
-          className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {data.source === 'etherscan' ? 'Download & Parse' : 'Continue to Mapping'}
         </button>
@@ -188,7 +188,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
       </div>
       <button
         onClick={() => setStep('SAVED')}
-        className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-200"
+        className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-200"
       >
         Save Contract
       </button>
@@ -202,13 +202,13 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
           <Check className="w-4 h-4 text-green-400" />
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">Contract Added</span>
         </div>
-        <button onClick={() => setStep('MAPPING')} className="text-[9px] text-[#919191] hover:text-white uppercase">Edit</button>
+        <button onClick={() => setStep('MAPPING')} className="text-[9px] text-[#919191] hover:text-white uppercase tracking-[0.2em]">Edit</button>
       </div>
       <div className="p-6">
         <div className="font-mono text-[11px] text-white/60 mb-1">
           {data.address ? `${data.address.slice(0, 10)}...${data.address.slice(-8)}` : 'No Address Provided'}
         </div>
-        <div className="text-[9px] uppercase tracking-widest text-neutral-500">
+        <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
           {Object.keys(data.mappings).length} Variables Mapped
         </div>
       </div>

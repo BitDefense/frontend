@@ -2,18 +2,18 @@
   "tasks": [
     {
       "id": "task-1",
-      "text": "Cleanup: Remove legacy ActionNode",
-      "status": "todo"
+      "text": "Scaffold DefenseActionNode and register in flow/menu",
+      "status": "done"
     },
     {
       "id": "task-2",
-      "text": "Implement ContextMenu component",
-      "status": "todo"
+      "text": "Implement path selection and Telegram alert flow",
+      "status": "done"
     },
     {
       "id": "task-3",
-      "text": "Integrate Context Menu and Edge-creation into FlowCanvas",
-      "status": "todo"
+      "text": "Implement Pause Agent flow and Saved state UI",
+      "status": "done"
     }
   ]
 }

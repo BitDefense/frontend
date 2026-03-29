@@ -88,7 +88,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
 
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <label className="text-[9px] font-mono text-[#919191] uppercase px-1">Bot Token</label>
+          <label className="text-[9px] font-mono text-[#919191] uppercase tracking-[0.2em] px-1">Bot Token</label>
           <input
             type="text"
             value={params.botToken || ''}
@@ -99,7 +99,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[9px] font-mono text-[#919191] uppercase px-1">Chat ID</label>
+          <label className="text-[9px] font-mono text-[#919191] uppercase tracking-[0.2em] px-1">Chat ID</label>
           <input
             type="text"
             value={params.chatId || ''}
@@ -134,7 +134,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
 
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <label className="text-[9px] font-mono text-[#919191] uppercase px-1">Role Address</label>
+          <label className="text-[9px] font-mono text-[#919191] uppercase tracking-[0.2em] px-1">Role Address</label>
           <input
             type="text"
             value={params.roleAddress || ''}
@@ -172,7 +172,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
 
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <label className="text-[9px] font-mono text-[#919191] uppercase px-1">Function Selector (4-byte hex)</label>
+          <label className="text-[9px] font-mono text-[#919191] uppercase tracking-[0.2em] px-1">Function Selector (4-byte hex)</label>
           <input
             type="text"
             value={params.functionHex || ''}
@@ -183,7 +183,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[9px] font-mono text-[#919191] uppercase px-1">Arguments (comma separated)</label>
+          <label className="text-[9px] font-mono text-[#919191] uppercase tracking-[0.2em] px-1">Arguments (comma separated)</label>
           <textarea
             value={params.args || ''}
             onChange={(e) => setParams({ ...params, args: e.target.value })}
@@ -230,18 +230,18 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
           <div className="mt-2 space-y-3 border-t border-white/5 pt-3">
             {actionType === 'TELEGRAM_ALERT' && (
               <div className="space-y-1">
-                <div className="text-[9px] text-[#919191] uppercase tracking-[0.1em]">Target Chat ID</div>
+                <div className="text-[9px] text-[#919191] uppercase tracking-[0.2em]">Target Chat ID</div>
                 <div className="text-[10px] font-mono text-white truncate">{params.chatId}</div>
               </div>
             )}
             {actionType === 'PAUSE_AGENT' && (
               <>
                 <div className="space-y-1">
-                  <div className="text-[9px] text-[#919191] uppercase tracking-[0.1em]">Role Holder</div>
+                  <div className="text-[9px] text-[#919191] uppercase tracking-[0.2em]">Role Holder</div>
                   <div className="text-[10px] font-mono text-white truncate">{params.roleAddress}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-[9px] text-[#919191] uppercase tracking-[0.1em]">Function Selector</div>
+                  <div className="text-[9px] text-[#919191] uppercase tracking-[0.2em]">Function Selector</div>
                   <div className="text-[10px] font-mono text-white truncate">{params.functionHex}</div>
                 </div>
               </>
