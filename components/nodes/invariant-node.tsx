@@ -4,7 +4,7 @@ import React from 'react';
 import { Shield } from 'lucide-react';
 import { Handle, Position, useHandleConnections, useNodesData } from '@xyflow/react';
 
-export type InvariantStep = 'CONFIG' | 'VALIDATION';
+export type InvariantStep = 'SELECT_VAR' | 'VARIABLE_TYPE' | 'OPERATOR' | 'THRESHOLD' | 'SAVED';
 
 export function InvariantNode() {
   const connections = useHandleConnections({
@@ -29,29 +29,12 @@ export function InvariantNode() {
       <div className="bg-[#353535]/50 p-4 flex items-center justify-between border-b border-white/10">
         <div className="flex items-center gap-3">
           <Shield className="w-4 h-4 text-white" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">Invariant Guard</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">ADD NEW INVARIANT</span>
         </div>
       </div>
 
-      <div className="p-6">
-        <div className="space-y-4">
-          <div className="text-[10px] uppercase tracking-widest text-[#919191]">
-            Connected Variables ({availableVariables.length})
-          </div>
-          {availableVariables.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {availableVariables.map((v: string) => (
-                <div key={v} className="bg-white/5 border border-white/10 px-2 py-1 text-[9px] font-mono text-white">
-                  {v}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-[10px] uppercase tracking-widest text-[#919191] border border-white/5 bg-black/40 p-4 text-center border-dashed">
-              Awaiting Contract Connection...
-            </div>
-          )}
-        </div>
+      <div className="p-6 min-h-[120px]">
+        {/* Wizard steps will be implemented here */}
       </div>
 
       <Handle 
