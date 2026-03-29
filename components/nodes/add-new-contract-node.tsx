@@ -51,8 +51,7 @@ export function AddNewContractNode() {
           ...prev,
           source: 'file',
           code: content,
-          variables: vars,
-          address: prev.address || file.name
+          variables: vars
         }));
       };
       reader.readAsText(file);
@@ -82,6 +81,7 @@ export function AddNewContractNode() {
   );
 
   const renderInputStep = () => {
+    const isInputValid = data.address.trim() !== '' && (data.source === 'etherscan' || !!data.code);
     return (
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191]">
@@ -133,7 +133,7 @@ export function AddNewContractNode() {
         ) : null}
 
         <button 
-          disabled={data.source === 'file' && !data.code}
+          disabled={!isInputValid}
           onClick={() => {
             if (data.source === 'etherscan') {
               // Simulated fetch of Example contract
