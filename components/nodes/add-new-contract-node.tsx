@@ -51,7 +51,8 @@ export function AddNewContractNode() {
           ...prev,
           source: 'file',
           code: content,
-          variables: vars
+          variables: vars,
+          address: prev.address || file.name
         }));
       };
       reader.readAsText(file);
@@ -126,7 +127,6 @@ export function AddNewContractNode() {
               <div className="flex flex-col items-center gap-2">
                 <Check className="w-4 h-4 text-green-400" />
                 <span className="text-white">File Loaded</span>
-                <span className="text-[8px] opacity-50 truncate w-full">{data.address}</span>
               </div>
             ) : (
               isDragging ? 'Drop to upload' : 'Drag & Drop .sol'
