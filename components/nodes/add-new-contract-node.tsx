@@ -47,14 +47,13 @@ export function AddNewContractNode() {
       reader.onload = (event) => {
         const content = event.target?.result as string;
         const vars = parseSolidityVariables(content);
-        setData({
-          ...data,
+        setData(prev => ({
+          ...prev,
           source: 'file',
           code: content,
           variables: vars,
-          address: file.name
-        });
-        setStep('MAPPING');
+          address: prev.address || file.name
+        }));
       };
       reader.readAsText(file);
     }
@@ -83,63 +82,71 @@ export function AddNewContractNode() {
   );
 
   const renderInputStep = () => {
-    if (data.source === 'etherscan') {
-      return (
-        <div className="p-6 space-y-6">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191]">
-            <button onClick={() => setStep('SOURCE')}><ArrowLeft className="w-3 h-3"/></button>
-            Etherscan Details
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191]">
+          <button onClick={() => setStep('SOURCE')}><ArrowLeft className="w-3 h-3"/></button>
+          {data.source === 'etherscan' ? 'Etherscan Details' : 'Local File Details'}
+        </div>
+        
+        <div className="space-y-4">
+          <input 
+            type="text"
+            placeholder="Contract Address"
+            className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white focus:outline-none focus:border-white/20"
+            value={data.address}
+            onChange={(e) => setData({...data, address: e.target.value})}
+          />
+          <select 
+            className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white appearance-none"
+            value={data.network}
+            onChange={(e) => setData({...data, network: e.target.value})}
+          >
+            <option value="ethereum">Ethereum Mainnet</option>
+            <option value="polygon">Polygon</option>
+            <option value="arbitrum">Arbitrum</option>
+            <option value="optimism">Optimism</option>
+          </select>
+        </div>
+
+        {data.source === 'file' ? (
+          <div 
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border border-dashed p-8 text-[10px] text-center uppercase tracking-widest transition-all ${
+              isDragging 
+                ? 'border-white/40 bg-white/5 text-white' 
+                : 'border-white/10 text-[#919191]'
+            }`}
+          >
+            {data.code ? (
+              <div className="flex flex-col items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                <span className="text-white">File Loaded</span>
+                <span className="text-[8px] opacity-50 truncate w-full">{data.address}</span>
+              </div>
+            ) : (
+              isDragging ? 'Drop to upload' : 'Drag & Drop .sol'
+            )}
           </div>
-          <div className="space-y-4">
-            <input 
-              type="text"
-              placeholder="Contract Address"
-              className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white focus:outline-none focus:border-white/20"
-              value={data.address}
-              onChange={(e) => setData({...data, address: e.target.value})}
-            />
-            <select 
-              className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white appearance-none"
-              value={data.network}
-              onChange={(e) => setData({...data, network: e.target.value})}
-            >
-              <option value="ethereum">Ethereum Mainnet</option>
-            </select>
-          </div>
-          <button 
-            onClick={() => {
+        ) : null}
+
+        <button 
+          disabled={data.source === 'file' && !data.code}
+          onClick={() => {
+            if (data.source === 'etherscan') {
               // Simulated fetch of Example contract
               const exampleCode = `contract Example { public uint256 totalSupply; constructor() { totalSupply = 1 ether; } }`;
               const vars = parseSolidityVariables(exampleCode);
               setData({...data, code: exampleCode, variables: vars});
-              setStep('MAPPING');
-            }}
-            className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-200"
-          >
-            Download & Parse
-          </button>
-        </div>
-      );
-    }
-    // For MVP, if source is 'file', we can just show a placeholder or basic upload UI
-    return (
-      <div className="p-6 space-y-6 text-center">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191]">
-          <button onClick={() => setStep('SOURCE')}><ArrowLeft className="w-3 h-3"/></button>
-          File Upload
-        </div>
-        <div 
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`border border-dashed p-12 text-[10px] uppercase tracking-widest transition-all ${
-            isDragging 
-              ? 'border-white/40 bg-white/5 text-white' 
-              : 'border-white/10 text-[#919191]'
-          }`}
+            }
+            setStep('MAPPING');
+          }}
+          className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isDragging ? 'Drop to upload' : 'Drag & Drop .sol'}
-        </div>
+          {data.source === 'etherscan' ? 'Download & Parse' : 'Continue to Mapping'}
+        </button>
       </div>
     );
   };
