@@ -177,7 +177,7 @@ export function AddNewContractNode() {
   );
 
   const renderSavedStep = () => (
-    <div className="bg-[#1b1b1b]">
+    <>
       <div className="bg-green-500/10 p-4 border-b border-green-500/20 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Check className="w-4 h-4 text-green-400" />
@@ -193,7 +193,7 @@ export function AddNewContractNode() {
           {Object.keys(data.mappings).length} Variables Mapped
         </div>
       </div>
-    </div>
+    </>
   );
 
   const renderHeader = () => {
