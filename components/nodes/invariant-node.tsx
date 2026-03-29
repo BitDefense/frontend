@@ -25,7 +25,7 @@ export function InvariantNode() {
     .filter((v, i, a) => a.findIndex(t => t.name === v.name) === i) || [];
 
   const renderSelectVar = () => (
-    <div className="space-y-4">
+    <div className="p-6 space-y-4">
       <div className="text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-2 px-1">Select Variable</div>
       <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 scrollbar-hide">
         {availableVariables.length > 0 ? (
@@ -60,9 +60,9 @@ export function InvariantNode() {
   const renderSelectOperator = () => {
     const operators = ['>=', '<=', '==', '!=', '>', '<'];
     return (
-      <div className="space-y-4">
+      <div className="p-6 space-y-4">
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191] mb-2 px-1">
-          <button 
+          <button
             onClick={() => setStep('SELECT_VAR')}
             className="hover:text-white transition-colors p-1 -ml-1"
           >
@@ -89,9 +89,9 @@ export function InvariantNode() {
   };
 
   const renderSetThreshold = () => (
-    <div className="space-y-4">
+    <div className="p-6 space-y-4">
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#919191] mb-4 px-1">
-        <button 
+        <button
           onClick={() => setStep('OPERATOR')}
           className="hover:text-white transition-colors p-1 -ml-1"
         >
@@ -112,7 +112,7 @@ export function InvariantNode() {
           autoFocus
         />
       </div>
-      <button 
+      <button
         disabled={!threshold}
         onClick={() => setStep('SAVED')}
         className="w-full mt-4 bg-white text-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-200 disabled:opacity-50 transition-colors"
@@ -123,13 +123,13 @@ export function InvariantNode() {
   );
 
   const renderSaved = () => (
-    <div className="-mx-6 -mt-6">
-      <div className="p-4 bg-blue-500/10 border-b border-blue-500/20 flex items-center gap-3 mb-6">
+    <>
+      <div className="p-4 bg-blue-500/10 border-b border-blue-500/20 flex items-center gap-3">
         <Shield className="w-4 h-4 text-blue-400" />
         <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Invariant Active</span>
       </div>
-      
-      <div className="px-6 pb-2">
+
+      <div className="p-6">
         <div className="p-4 bg-white/5 border border-white/10 flex flex-col gap-2">
           <div className="text-[10px] uppercase tracking-widest text-[#919191]">Current Rule</div>
           <div className="text-[13px] font-mono text-white flex items-center gap-2 flex-wrap">
@@ -139,7 +139,7 @@ export function InvariantNode() {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={() => {
             setStep('SELECT_VAR');
             setThreshold(null);
@@ -149,35 +149,37 @@ export function InvariantNode() {
           Edit Invariant
         </button>
       </div>
-    </div>
+    </>
   );
 
   return (
-    <div className="relative w-80 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl group rounded-none">
-      <Handle 
-        type="target" 
-        position={Position.Left} 
-        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all left-[-6px]" 
+    <div className="relative w-96 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl group rounded-none">
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all left-[-6px]"
       />
-      
-      <div className="bg-[#353535]/50 p-4 flex items-center justify-between border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <Shield className="w-4 h-4 text-white" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">ADD INVARIANT</span>
-        </div>
-      </div>
 
-      <div className="p-6 min-h-[120px]">
+      {step !== 'SAVED' && (
+        <div className="bg-[#353535]/50 p-4 flex items-center justify-between border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <Shield className="w-4 h-4 text-white" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">ADD INVARIANT</span>
+          </div>
+        </div>
+      )}
+
+      <div className="min-h-[120px]">
         {step === 'SELECT_VAR' && renderSelectVar()}
         {step === 'OPERATOR' && renderSelectOperator()}
         {step === 'THRESHOLD' && renderSetThreshold()}
         {step === 'SAVED' && renderSaved()}
       </div>
 
-      <Handle 
-        type="source" 
-        position={Position.Right} 
-        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all right-[-6px]" 
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all right-[-6px]"
       />
     </div>
   );
