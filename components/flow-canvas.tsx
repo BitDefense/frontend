@@ -16,11 +16,13 @@ import '@xyflow/react/dist/style.css';
 
 import { AddNewContractNode } from '@/components/nodes/add-new-contract-node';
 import { InvariantNode } from '@/components/nodes/invariant-node';
+import { DefenseActionNode } from '@/components/nodes/defense-action-node';
 import { ContextMenu } from '@/components/flow/context-menu';
 
 const nodeTypes = {
   addNewContract: AddNewContractNode,
   invariant: InvariantNode,
+  defenseAction: DefenseActionNode,
 };
 
 const initialNodes = [
@@ -32,9 +34,9 @@ const initialEdges: Edge[] = [];
 function FlowCanvasInner() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' } | null>(null);
+  const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' | 'invariant' } | null>(null);
   const [connectingNode, setConnectingNode] = useState<string | null>(null);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, getNode } = useReactFlow();
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -69,14 +71,22 @@ function FlowCanvasInner() {
 
       if (targetIsPane) {
         const { clientX, clientY } = 'clientX' in event ? event : event.touches[0];
+        const node = getNode(connectingNode);
+
+        // Determine filter based on source node type
+        let filter: 'canvas' | 'contract' | 'invariant' = 'contract';
+        if (node?.type === 'invariant') {
+          filter = 'invariant';
+        }
+
         setMenu({
           x: clientX,
           y: clientY,
-          filter: 'contract',
+          filter,
         });
       }
     },
-    [connectingNode],
+    [connectingNode, getNode],
   );
 
   const addNode = useCallback(

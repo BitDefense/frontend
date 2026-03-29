@@ -1,21 +1,21 @@
 'use client';
 
 import React from 'react';
-import { Plus, Shield, X } from 'lucide-react';
+import { Plus, Shield, X, ShieldAlert } from 'lucide-react';
 
 export interface ContextMenuProps {
   x: number;
   y: number;
   onClose: () => void;
   onSelect: (type: string) => void;
-  filter?: 'canvas' | 'contract';
+  filter?: 'canvas' | 'contract' | 'invariant';
 }
 
 interface MenuOption {
   id: string;
   label: string;
   icon: any;
-  allowedFrom: ('canvas' | 'contract')[];
+  allowedFrom: ('canvas' | 'contract' | 'invariant')[];
 }
 
 const OPTIONS: MenuOption[] = [
@@ -30,6 +30,12 @@ const OPTIONS: MenuOption[] = [
     label: 'Add Invariant',
     icon: Shield,
     allowedFrom: ['canvas', 'contract']
+  },
+  {
+    id: 'defenseAction',
+    label: 'Defense Action',
+    icon: ShieldAlert,
+    allowedFrom: ['canvas', 'invariant']
   }
 ];
 
