@@ -206,14 +206,14 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
 
   const renderSaved = () => (
     <>
-      <div className="bg-red-600 p-4 border-b border-red-500/20 flex items-center justify-between">
+      <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Zap className="w-4 h-4 text-white animate-pulse" />
+          <Zap className="w-4 h-4 text-red-400 animate-pulse" />
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">Defense Active</span>
         </div>
         <button
           onClick={() => setStep('SELECT_TYPE')}
-          className="text-[9px] text-white/70 hover:text-white uppercase tracking-[0.2em] underline underline-offset-4"
+          className="text-[9px] text-[#919191] hover:text-white uppercase tracking-[0.2em]"
         >
           Edit
         </button>
