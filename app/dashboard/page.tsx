@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Search, Radio, Terminal, ZoomIn, ZoomOut, Maximize, Play } from 'lucide-react';
 import { Sora, JetBrains_Mono } from 'next/font/google';
+import { api } from '@/lib/api';
 
 const sora = Sora({ subsets: ['latin'], variable: '--font-sora' });
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
@@ -82,6 +83,27 @@ const DashboardFooter = () => (
 );
 
 export default function Dashboard() {
+  useEffect(() => {
+    async function init() {
+      try {
+        await api.getDashboard(1);
+        console.log('Dashboard 1 loaded');
+      } catch (e: any) {
+        if (e.message === 'NOT_FOUND') {
+          try {
+            await api.createDashboard({ name: 'Default Dashboard' });
+            console.log('Dashboard 1 created');
+          } catch (createError) {
+            console.error('Failed to create dashboard:', createError);
+          }
+        } else {
+          console.error('Failed to load dashboard:', e);
+        }
+      }
+    }
+    init();
+  }, []);
+
   return (
     <div className={`${sora.variable} ${mono.variable} font-sans bg-[#131313] text-[#e2e2e2] h-screen w-full overflow-hidden selection:bg-white selection:text-black`}>
       <FlowCanvas />
