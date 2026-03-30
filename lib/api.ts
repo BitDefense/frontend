@@ -45,4 +45,7 @@ export const api = {
     apiFetch<any>(`/invariants/${invId}/defense-actions/${actionId}`, { method: 'POST' }),
   unlinkInvariantAction: (invId: number, actionId: number) => 
     apiFetch<any>(`/invariants/${invId}/defense-actions/${actionId}`, { method: 'DELETE' }),
+  deleteContract: (id: number) => apiFetch<any>(`/contracts/${id}`, { method: 'DELETE' }),
+  deleteInvariant: (id: number) => apiFetch<any>(`/invariants/${id}`, { method: 'DELETE' }),
+  deleteDefenseAction: (id: number) => apiFetch<any>(`/defense-actions/${id}`, { method: 'DELETE' }),
 };
