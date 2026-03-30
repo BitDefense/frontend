@@ -46,7 +46,7 @@ function transformInitialData(initialData: any) {
   // Map Contracts
   initialData.contracts?.forEach((c: any, i: number) => {
     const nodeId = `contract-${c.id}`;
-    
+
     // Transform backend variables (mappings) to frontend variables list
     const frontendVariables = Object.entries(c.variables || {}).map(([name, val]) => ({
       name,
@@ -57,9 +57,9 @@ function transformInitialData(initialData: any) {
       id: nodeId,
       type: 'addNewContract',
       position: { x: 100, y: 100 + i * 400 },
-      data: { 
-        ...c, 
-        backendId: c.id, 
+      data: {
+        ...c,
+        backendId: c.id,
         step: 'SAVED',
         mappings: c.variables || {},
         variables: frontendVariables
@@ -76,17 +76,17 @@ function transformInitialData(initialData: any) {
         id: invNodeId,
         type: 'invariant',
         position: { x: 550, y: 100 + i * 400 + j * 150 },
-        data: { 
-          ...inv, 
-          backendId: inv.id, 
+        data: {
+          ...inv,
+          backendId: inv.id,
           step: 'SAVED',
-          selectedVar: inv.target,
+          selectedVar: inv.variable,
           operator: inv.type,
           threshold: inv.target,
           selectedVarType: inv.slot_type
         }
       });
-      
+
       newEdges.push({
         id: `e-${nodeId}-${invNodeId}`,
         source: nodeId,
@@ -105,9 +105,9 @@ function transformInitialData(initialData: any) {
           id: daNodeId,
           type: 'defenseAction',
           position: { x: 1000, y: 100 + i * 400 + j * 150 + k * 100 },
-          data: { 
-            ...da, 
-            backendId: da.id, 
+          data: {
+            ...da,
+            backendId: da.id,
             step: 'SAVED',
             actionType: da.type,
             params: {
@@ -119,7 +119,7 @@ function transformInitialData(initialData: any) {
             }
           }
         });
-        
+
         newEdges.push({
           id: `e-${invNodeId}-${daNodeId}`,
           source: invNodeId,
@@ -217,13 +217,14 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
       } else if (node.type === 'invariant') {
         const parentEdge = getEdges().find(e => e.target === nodeId);
         const parentNode = parentEdge ? getNode(parentEdge.source) : null;
-        
+
         const contractAddress = parentNode?.data?.address || '0x0';
         const storageSlot = parentNode?.data?.mappings?.[data.selectedVar] || '0x0';
 
         result = await api.saveInvariant({
           contract: contractAddress,
           type: data.operator,
+          variable: data.selectedVar,
           target: data.threshold,
           storage: storageSlot,
           slot_type: data.selectedVarType,
@@ -243,7 +244,7 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
 
       if (result?.id) {
         setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, backendId: result.id } } : n));
-        
+
         const connectedEdges = getEdges().filter(edge => edge.source === nodeId || edge.target === nodeId);
         connectedEdges.forEach(edge => {
           handleLinkNodes(edge.source, edge.target, { id: nodeId, backendId: result.id });
