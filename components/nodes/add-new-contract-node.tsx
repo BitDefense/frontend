@@ -187,7 +187,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
         )}
       </div>
       <button
-        onClick={() => setStep('SAVED')}
+        onClick={handleSave}
         className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-200"
       >
         Save Contract
@@ -231,6 +231,18 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
     <div className="relative w-96 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl rounded-none group">
       {renderHeader()}
       {step === 'SOURCE' && renderSourceStep()}
+      {step === 'INPUT' && renderInputStep()}
+      {step === 'MAPPING' && renderMappingStep()}
+      {step === 'SAVED' && renderSavedStep()}
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all right-[-6px]"
+      />
+    </div>
+  );
+}
+()}
       {step === 'INPUT' && renderInputStep()}
       {step === 'MAPPING' && renderMappingStep()}
       {step === 'SAVED' && renderSavedStep()}

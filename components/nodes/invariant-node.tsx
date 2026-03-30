@@ -138,7 +138,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
       </div>
       <button
         disabled={!threshold}
-        onClick={() => setStep('SAVED')}
+        onClick={handleSave}
         className="w-full mt-4 bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-200 disabled:opacity-50 transition-colors"
       >
         Finish
@@ -197,6 +197,19 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
       <div className="min-h-[120px]">
         {step === 'SELECT_VAR' && renderSelectVar()}
         {step === 'OPERATOR' && renderSelectOperator()}
+        {step === 'THRESHOLD' && renderSetThreshold()}
+        {step === 'SAVED' && renderSaved()}
+      </div>
+
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all right-[-6px]"
+      />
+    </div>
+  );
+}
+ectOperator()}
         {step === 'THRESHOLD' && renderSetThreshold()}
         {step === 'SAVED' && renderSaved()}
       </div>

@@ -194,7 +194,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
         </div>
 
         <button
-          onClick={() => setStep('SAVED')}
+          onClick={handleSave}
           disabled={!params.functionHex}
           className="w-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 py-2.5 transition-all group/save disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -270,6 +270,16 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
       )}
 
       <div className="min-h-[100px]">
+        {step === 'SELECT_TYPE' && renderSelectType()}
+        {step === 'TELEGRAM_CONFIG' && renderTelegramConfig()}
+        {step === 'PAUSE_ROLE' && renderPauseRole()}
+        {step === 'PAUSE_FUNCTION' && renderPauseFunction()}
+        {step === 'SAVED' && renderSaved()}
+      </div>
+    </div>
+  );
+}
+lassName="min-h-[100px]">
         {step === 'SELECT_TYPE' && renderSelectType()}
         {step === 'TELEGRAM_CONFIG' && renderTelegramConfig()}
         {step === 'PAUSE_ROLE' && renderPauseRole()}
