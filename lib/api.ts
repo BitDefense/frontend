@@ -33,4 +33,16 @@ export const api = {
     method: id ? 'PUT' : 'POST',
     body: JSON.stringify(data),
   }),
+  linkDashboardContract: (dashboardId: number, contractId: number) => 
+    apiFetch<any>(`/dashboards/${dashboardId}/contracts/${contractId}`, { method: 'POST' }),
+  unlinkDashboardContract: (dashboardId: number, contractId: number) => 
+    apiFetch<any>(`/dashboards/${dashboardId}/contracts/${contractId}`, { method: 'DELETE' }),
+  linkContractInvariant: (contractId: number, invId: number) => 
+    apiFetch<any>(`/contracts/${contractId}/invariants/${invId}`, { method: 'POST' }),
+  unlinkContractInvariant: (contractId: number, invId: number) => 
+    apiFetch<any>(`/contracts/${contractId}/invariants/${invId}`, { method: 'DELETE' }),
+  linkInvariantAction: (invId: number, actionId: number) => 
+    apiFetch<any>(`/invariants/${invId}/defense-actions/${actionId}`, { method: 'POST' }),
+  unlinkInvariantAction: (invId: number, actionId: number) => 
+    apiFetch<any>(`/invariants/${invId}/defense-actions/${actionId}`, { method: 'DELETE' }),
 };
