@@ -33,6 +33,48 @@ function FlowCanvasInner() {
   const [connectingNode, setConnectingNode] = useState<string | null>(null);
   const { screenToFlowPosition, getNode } = useReactFlow();
 
+  const handleLinkNodes = useCallback(async (sourceId: string, targetId: string) => {
+    const sourceNode = getNode(sourceId);
+    const targetNode = getNode(targetId);
+    if (!sourceNode || !targetNode) return;
+
+    const sourceBackendId = sourceNode.data?.backendId;
+    const targetBackendId = targetNode.data?.backendId;
+
+    if (!sourceBackendId || !targetBackendId) return;
+
+    try {
+      if (sourceNode.type === 'addNewContract' && targetNode.type === 'invariant') {
+        await api.linkContractInvariant(sourceBackendId, targetBackendId);
+      } else if (sourceNode.type === 'invariant' && targetNode.type === 'defenseAction') {
+        await api.linkInvariantAction(sourceBackendId, targetBackendId);
+      }
+    } catch (e) {
+      console.error('Failed to link nodes:', e);
+    }
+  }, [getNode]);
+
+  const handleUnlinkNodes = useCallback(async (sourceId: string, targetId: string) => {
+    const sourceNode = getNode(sourceId);
+    const targetNode = getNode(targetId);
+    if (!sourceNode || !targetNode) return;
+
+    const sourceBackendId = sourceNode.data?.backendId;
+    const targetBackendId = targetNode.data?.backendId;
+
+    if (!sourceBackendId || !targetBackendId) return;
+
+    try {
+      if (sourceNode.type === 'addNewContract' && targetNode.type === 'invariant') {
+        await api.unlinkContractInvariant(sourceBackendId, targetBackendId);
+      } else if (sourceNode.type === 'invariant' && targetNode.type === 'defenseAction') {
+        await api.unlinkInvariantAction(sourceBackendId, targetBackendId);
+      }
+    } catch (e) {
+      console.error('Failed to unlink nodes:', e);
+    }
+  }, [getNode]);
+
   const onNodeSave = useCallback(async (nodeId: string, data: any) => {
     const node = getNode(nodeId);
     if (!node) return;
@@ -47,6 +89,10 @@ function FlowCanvasInner() {
           network: data.network,
           variables: data.variables.reduce((acc: any, v: any) => ({ ...acc, [v.name]: v.type }), {}),
         }, backendId);
+
+        if (!backendId && result?.id) {
+          await api.linkDashboardContract(1, result.id);
+        }
       } else if (node.type === 'invariant') {
         result = await api.saveInvariant({
           contract: data.selectedVar, // Placeholder mapping
@@ -84,9 +130,18 @@ function FlowCanvasInner() {
     (params: Connection) => {
       setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#fff', strokeWidth: 2 } }, eds));
       setConnectingNode(null);
+      if (params.source && params.target) {
+        handleLinkNodes(params.source, params.target);
+      }
     },
-    [setEdges],
+    [setEdges, handleLinkNodes],
   );
+
+  const onEdgesDelete = useCallback((deletedEdges: Edge[]) => {
+    deletedEdges.forEach(edge => {
+      handleUnlinkNodes(edge.source, edge.target);
+    });
+  }, [handleUnlinkNodes]);
 
   const onPaneContextMenu = useCallback(
     (event: React.MouseEvent) => {
@@ -159,12 +214,13 @@ function FlowCanvasInner() {
           style: { stroke: '#fff', strokeWidth: 2 },
         };
         setEdges((eds) => addEdge(edge, eds));
+        handleLinkNodes(connectingNode, id);
       }
 
       setMenu(null);
       setConnectingNode(null);
     },
-    [menu, connectingNode, screenToFlowPosition, setNodes, setEdges],
+    [menu, connectingNode, screenToFlowPosition, setNodes, setEdges, handleLinkNodes],
   );
 
   return (
@@ -175,6 +231,7 @@ function FlowCanvasInner() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onEdgesDelete={onEdgesDelete}
         onConnectStart={onConnectStart}
         onConnectEnd={onConnectEnd}
         onPaneContextMenu={onPaneContextMenu}
