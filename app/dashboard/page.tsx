@@ -83,15 +83,19 @@ const DashboardFooter = () => (
 );
 
 export default function Dashboard() {
+  const [dashboardData, setDashboardData] = React.useState<any>(null);
+
   useEffect(() => {
     async function init() {
       try {
-        await api.getDashboard(1);
+        const data = await api.getDashboard(1);
+        setDashboardData(data);
         console.log('Dashboard 1 loaded');
       } catch (e: any) {
         if (e.message === 'NOT_FOUND') {
           try {
-            await api.createDashboard({ name: 'Default Dashboard' });
+            const data = await api.createDashboard({ name: 'Default Dashboard' });
+            setDashboardData(data);
             console.log('Dashboard 1 created');
           } catch (createError) {
             console.error('Failed to create dashboard:', createError);
@@ -106,7 +110,7 @@ export default function Dashboard() {
 
   return (
     <div className={`${sora.variable} ${mono.variable} font-sans bg-[#131313] text-[#e2e2e2] h-screen w-full overflow-hidden selection:bg-white selection:text-black`}>
-      <FlowCanvas />
+      <FlowCanvas initialData={dashboardData} />
       <DashboardHeader />
       <DashboardFooter />
     </div>

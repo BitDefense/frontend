@@ -26,10 +26,90 @@ const initialNodes = [
 
 const initialEdges: Edge[] = [];
 
-function FlowCanvasInner() {
+function FlowCanvasInner({ initialData }: { initialData?: any }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' | 'invariant' } | null>(null);
+
+  React.useEffect(() => {
+    if (!initialData) return;
+
+    const newNodes: any[] = [];
+    const newEdges: any[] = [];
+
+    // Map Contracts
+    initialData.contracts?.forEach((c: any, i: number) => {
+      const nodeId = `contract-${c.id}`;
+      newNodes.push({
+        id: nodeId,
+        type: 'addNewContract',
+        position: { x: 100, y: 100 + i * 400 },
+        data: { ...c, backendId: c.id, step: 'SAVED' }
+      });
+
+      // Map Invariants for this contract
+      initialData.invariants?.filter((inv: any) => c.invariant_ids?.includes(inv.id)).forEach((inv: any, j: number) => {
+        const invNodeId = `invariant-${inv.id}`;
+        newNodes.push({
+          id: invNodeId,
+          type: 'invariant',
+          position: { x: 550, y: 100 + i * 400 + j * 150 },
+          data: { 
+            ...inv, 
+            backendId: inv.id, 
+            step: 'SAVED',
+            selectedVar: inv.target, // Name (assuming target is used as name in this mapping as per instructions)
+            operator: inv.type, // Comparison symbol
+            threshold: inv.target, // Threshold
+            selectedVarType: inv.slot_type
+          }
+        });
+        newEdges.push({
+          id: `e-${nodeId}-${invNodeId}`,
+          source: nodeId,
+          target: invNodeId,
+          animated: true,
+          style: { stroke: '#fff', strokeWidth: 2 }
+        });
+
+        // Map Defense Actions for this invariant
+        initialData.defense_actions?.filter((da: any) => inv.defense_action_ids?.includes(da.id)).forEach((da: any, k: number) => {
+          const daNodeId = `da-${da.id}`;
+          newNodes.push({
+            id: daNodeId,
+            type: 'defenseAction',
+            position: { x: 1000, y: 100 + i * 400 + j * 150 + k * 100 },
+            data: { 
+              ...da, 
+              backendId: da.id, 
+              step: 'SAVED',
+              actionType: da.type,
+              params: {
+                botToken: da.tg_api_key,
+                chatId: da.tg_chat_id,
+                roleAddress: da.role_id,
+                functionHex: da.function_sig,
+                args: da.calldata
+              }
+            }
+          });
+          newEdges.push({
+            id: `e-${invNodeId}-${daNodeId}`,
+            source: invNodeId,
+            target: daNodeId,
+            animated: true,
+            style: { stroke: '#fff', strokeWidth: 2 }
+          });
+        });
+      });
+    });
+
+    if (newNodes.length > 0) {
+      setNodes(newNodes);
+      setEdges(newEdges);
+    }
+  }, [initialData, setNodes, setEdges]);
+
   const [connectingNode, setConnectingNode] = useState<string | null>(null);
   const { screenToFlowPosition, getNode, getEdges } = useReactFlow();
 
@@ -87,23 +167,25 @@ function FlowCanvasInner() {
         result = await api.saveContract({
           address: data.address,
           network: data.network,
-          variables: data.variables.reduce((acc: any, v: any) => ({ ...acc, [v.name]: v.type }), {}),
+          variables: data.mappings || {}, // Use the storage slot mappings
         }, backendId);
 
         if (!backendId && result?.id) {
           await api.linkDashboardContract(1, result.id);
         }
       } else if (node.type === 'invariant') {
-        // Find parent contract node to get address
+        // Find parent contract node to get address and storage slot
         const parentEdge = getEdges().find(e => e.target === nodeId);
         const parentNode = parentEdge ? getNode(parentEdge.source) : null;
+        
         const contractAddress = parentNode?.data?.address || '0x0';
+        const storageSlot = parentNode?.data?.mappings?.[data.selectedVar] || '0x0';
 
         result = await api.saveInvariant({
           contract: contractAddress,
           type: data.operator, // Use the comparison symbol
           target: data.threshold, // Threshold value
-          storage: '0x0',
+          storage: storageSlot, // Use the actual storage slot from parent mappings
           slot_type: data.selectedVarType,
           network: 'ethereum'
         }, backendId);
@@ -272,10 +354,10 @@ function FlowCanvasInner() {
   );
 }
 
-export function FlowCanvas() {
+export function FlowCanvas({ initialData }: { initialData?: any }) {
   return (
     <ReactFlowProvider>
-      <FlowCanvasInner />
+      <FlowCanvasInner initialData={initialData} />
     </ReactFlowProvider>
   );
 }
