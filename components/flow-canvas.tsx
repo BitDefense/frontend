@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import {
   ReactFlow,
   addEdge,
@@ -11,6 +11,7 @@ import {
   Edge,
   ReactFlowProvider,
   useReactFlow,
+  Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -20,112 +21,138 @@ import { InvariantNode } from '@/components/nodes/invariant-node';
 import { DefenseActionNode } from '@/components/nodes/defense-action-node';
 import { ContextMenu } from '@/components/flow/context-menu';
 
-const initialNodes = [
+const DEFAULT_NODES: Node[] = [
   { id: 'node-1', type: 'addNewContract', position: { x: 100, y: 200 }, data: {} },
 ];
 
-const initialEdges: Edge[] = [];
+const DEFAULT_EDGES: Edge[] = [];
 
-function FlowCanvasInner({ initialData }: { initialData?: any }) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' | 'invariant' } | null>(null);
+/**
+ * Helper to transform backend data structure into React Flow nodes and edges.
+ * Optimized with Maps for O(N) performance.
+ */
+function transformInitialData(initialData: any) {
+  if (!initialData || (!initialData.contracts?.length && !initialData.invariants?.length && !initialData.defense_actions?.length)) {
+    return { nodes: DEFAULT_NODES, edges: DEFAULT_EDGES };
+  }
 
-  React.useEffect(() => {
-    if (!initialData) return;
+  const newNodes: Node[] = [];
+  const newEdges: Edge[] = [];
 
-    const newNodes: any[] = [];
-    const newEdges: any[] = [];
+  // Create lookup maps for performance
+  const invariantsMap = new Map(initialData.invariants?.map((inv: any) => [inv.id, inv]));
+  const defenseActionsMap = new Map(initialData.defense_actions?.map((da: any) => [da.id, da]));
 
-    // Map Contracts
-    initialData.contracts?.forEach((c: any, i: number) => {
-      const nodeId = `contract-${c.id}`;
-      
-      // Transform backend variables (mappings) to frontend variables list
-      // Note: Backend stores storage slot mappings in the "variables" field
-      const frontendVariables = Object.entries(c.variables || {}).map(([name, val]) => ({
-        name,
-        type: 'uint256' // Default type for display, as backend currently stores slot mappings
-      }));
+  // Map Contracts
+  initialData.contracts?.forEach((c: any, i: number) => {
+    const nodeId = `contract-${c.id}`;
+    
+    // Transform backend variables (mappings) to frontend variables list
+    const frontendVariables = Object.entries(c.variables || {}).map(([name, val]) => ({
+      name,
+      type: 'uint256' // Default type for display
+    }));
 
+    newNodes.push({
+      id: nodeId,
+      type: 'addNewContract',
+      position: { x: 100, y: 100 + i * 400 },
+      data: { 
+        ...c, 
+        backendId: c.id, 
+        step: 'SAVED',
+        mappings: c.variables || {},
+        variables: frontendVariables
+      }
+    });
+
+    // Map Invariants for this contract
+    c.invariant_ids?.forEach((invId: number, j: number) => {
+      const inv = invariantsMap.get(invId);
+      if (!inv) return;
+
+      const invNodeId = `invariant-${inv.id}`;
       newNodes.push({
-        id: nodeId,
-        type: 'addNewContract',
-        position: { x: 100, y: 100 + i * 400 },
+        id: invNodeId,
+        type: 'invariant',
+        position: { x: 550, y: 100 + i * 400 + j * 150 },
         data: { 
-          ...c, 
-          backendId: c.id, 
+          ...inv, 
+          backendId: inv.id, 
           step: 'SAVED',
-          mappings: c.variables || {}, // Map backend variables to frontend mappings
-          variables: frontendVariables // Populate variables array for display
+          selectedVar: inv.target,
+          operator: inv.type,
+          threshold: inv.target,
+          selectedVarType: inv.slot_type
         }
       });
+      
+      newEdges.push({
+        id: `e-${nodeId}-${invNodeId}`,
+        source: nodeId,
+        target: invNodeId,
+        animated: true,
+        style: { stroke: '#fff', strokeWidth: 2 }
+      });
 
-      // Map Invariants for this contract
-      initialData.invariants?.filter((inv: any) => c.invariant_ids?.includes(inv.id)).forEach((inv: any, j: number) => {
-        const invNodeId = `invariant-${inv.id}`;
+      // Map Defense Actions for this invariant
+      inv.defense_action_ids?.forEach((daId: number, k: number) => {
+        const da = defenseActionsMap.get(daId);
+        if (!da) return;
+
+        const daNodeId = `da-${da.id}`;
         newNodes.push({
-          id: invNodeId,
-          type: 'invariant',
-          position: { x: 550, y: 100 + i * 400 + j * 150 },
+          id: daNodeId,
+          type: 'defenseAction',
+          position: { x: 1000, y: 100 + i * 400 + j * 150 + k * 100 },
           data: { 
-            ...inv, 
-            backendId: inv.id, 
+            ...da, 
+            backendId: da.id, 
             step: 'SAVED',
-            selectedVar: inv.target, // Name (assuming target is used as name in this mapping as per instructions)
-            operator: inv.type, // Comparison symbol
-            threshold: inv.target, // Threshold
-            selectedVarType: inv.slot_type
+            actionType: da.type,
+            params: {
+              botToken: da.tg_api_key,
+              chatId: da.tg_chat_id,
+              roleAddress: da.role_id,
+              functionHex: da.function_sig,
+              args: da.calldata
+            }
           }
         });
+        
         newEdges.push({
-          id: `e-${nodeId}-${invNodeId}`,
-          source: nodeId,
-          target: invNodeId,
+          id: `e-${invNodeId}-${daNodeId}`,
+          source: invNodeId,
+          target: daNodeId,
           animated: true,
           style: { stroke: '#fff', strokeWidth: 2 }
         });
-
-        // Map Defense Actions for this invariant
-        initialData.defense_actions?.filter((da: any) => inv.defense_action_ids?.includes(da.id)).forEach((da: any, k: number) => {
-          const daNodeId = `da-${da.id}`;
-          newNodes.push({
-            id: daNodeId,
-            type: 'defenseAction',
-            position: { x: 1000, y: 100 + i * 400 + j * 150 + k * 100 },
-            data: { 
-              ...da, 
-              backendId: da.id, 
-              step: 'SAVED',
-              actionType: da.type,
-              params: {
-                botToken: da.tg_api_key,
-                chatId: da.tg_chat_id,
-                roleAddress: da.role_id,
-                functionHex: da.function_sig,
-                args: da.calldata
-              }
-            }
-          });
-          newEdges.push({
-            id: `e-${invNodeId}-${daNodeId}`,
-            source: invNodeId,
-            target: daNodeId,
-            animated: true,
-            style: { stroke: '#fff', strokeWidth: 2 }
-          });
-        });
       });
     });
+  });
 
-    if (newNodes.length > 0) {
+  return { nodes: newNodes, edges: newEdges };
+}
+
+function FlowCanvasInner({ initialData }: { initialData?: any }) {
+  // Compute initial state from data to avoid hydration flickers
+  const transformedInitial = useMemo(() => transformInitialData(initialData), [initialData]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(transformedInitial.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(transformedInitial.edges);
+  const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' | 'invariant' } | null>(null);
+  const [connectingNode, setConnectingNode] = useState<string | null>(null);
+
+  const { screenToFlowPosition, getNode, getEdges } = useReactFlow();
+
+  // Sync state if initialData changes after mount
+  useEffect(() => {
+    if (initialData) {
+      const { nodes: newNodes, edges: newEdges } = transformInitialData(initialData);
       setNodes(newNodes);
       setEdges(newEdges);
     }
   }, [initialData, setNodes, setEdges]);
-
-  const [connectingNode, setConnectingNode] = useState<string | null>(null);
-  const { screenToFlowPosition, getNode, getEdges } = useReactFlow();
 
   const handleLinkNodes = useCallback(async (sourceId: string, targetId: string, overrideBackendId?: { id: string, backendId: number }) => {
     const sourceNode = getNode(sourceId);
@@ -181,14 +208,13 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
         result = await api.saveContract({
           address: data.address,
           network: data.network,
-          variables: data.mappings || {}, // Use the storage slot mappings
+          variables: data.mappings || {},
         }, backendId);
 
         if (!backendId && result?.id) {
           await api.linkDashboardContract(1, result.id);
         }
       } else if (node.type === 'invariant') {
-        // Find parent contract node to get address and storage slot
         const parentEdge = getEdges().find(e => e.target === nodeId);
         const parentNode = parentEdge ? getNode(parentEdge.source) : null;
         
@@ -197,9 +223,9 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
 
         result = await api.saveInvariant({
           contract: contractAddress,
-          type: data.operator, // Use the comparison symbol
-          target: data.threshold, // Threshold value
-          storage: storageSlot, // Use the actual storage slot from parent mappings
+          type: data.operator,
+          target: data.threshold,
+          storage: storageSlot,
           slot_type: data.selectedVarType,
           network: 'ethereum'
         }, backendId);
@@ -218,14 +244,14 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
       if (result?.id) {
         setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, backendId: result.id } } : n));
         
-        // Link existing connections if both nodes now have backend IDs
         const connectedEdges = getEdges().filter(edge => edge.source === nodeId || edge.target === nodeId);
         connectedEdges.forEach(edge => {
           handleLinkNodes(edge.source, edge.target, { id: nodeId, backendId: result.id });
         });
       }
     } catch (e) {
-      console.error(`Failed to save node ${nodeId}:`, e);
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      console.error(`Failed to save node ${nodeId}:`, errorMessage);
       throw e;
     }
   }, [getNode, getEdges, setNodes, handleLinkNodes]);
@@ -253,9 +279,9 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
     });
   }, [handleUnlinkNodes]);
 
-  const onNodesDelete = useCallback(async (deletedNodes: any[]) => {
+  const onNodesDelete = useCallback(async (deletedNodes: Node[]) => {
     for (const node of deletedNodes) {
-      const backendId = node.data?.backendId;
+      const backendId = (node.data as any)?.backendId;
       if (!backendId) continue;
 
       try {
@@ -266,9 +292,8 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
         } else if (node.type === 'defenseAction') {
           await api.deleteDefenseAction(backendId);
         }
-        console.log(`Deleted node ${node.id} from backend (ID: ${backendId})`);
       } catch (e) {
-        console.error(`Failed to delete node ${node.id} from backend:`, e);
+        console.error(`Failed to delete node ${node.id} (Backend ID: ${backendId}):`, e);
       }
     }
   }, []);
@@ -300,7 +325,6 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
         const { clientX, clientY } = 'clientX' in event ? event : event.touches[0];
         const node = getNode(connectingNode);
 
-        // Determine filter based on source node type
         let filter: 'canvas' | 'contract' | 'invariant' = 'contract';
         if (node?.type === 'invariant') {
           filter = 'invariant';
@@ -326,7 +350,7 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
         y: menu.y,
       });
 
-      const newNode = {
+      const newNode: Node = {
         id,
         type,
         position,
@@ -354,7 +378,7 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
   );
 
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-0" aria-label="Defensive Flow Canvas">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -396,3 +420,4 @@ export function FlowCanvas({ initialData }: { initialData?: any }) {
     </ReactFlowProvider>
   );
 }
+

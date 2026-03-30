@@ -16,8 +16,8 @@ export interface ContractData {
   mappings: Record<string, string>;
 }
 
-export function AddNewContractNode({ id, data: initialData }: { id: string, data: any }) {
-  const [step, setStep] = useState<WizardStep>('SOURCE');
+export function AddNewContractNode({ id, data: initialData, onSave }: { id: string, data: any, onSave?: (data: any) => Promise<void> }) {
+  const [step, setStep] = useState<WizardStep>(initialData?.step || 'SOURCE');
   const [isDragging, setIsDragging] = useState(false);
   const { setNodes } = useReactFlow();
 
@@ -41,6 +41,18 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
       })
     );
   }, [data, id, setNodes]);
+
+  const handleSave = async () => {
+    if (onSave) {
+      try {
+        await onSave(data);
+      } catch (e) {
+        console.error('Save failed:', e);
+        return;
+      }
+    }
+    setStep('SAVED');
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -100,7 +112,13 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
     return (
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#919191]">
-          <button onClick={() => setStep('SOURCE')}><ArrowLeft className="w-3 h-3" /></button>
+          <button 
+            onClick={() => setStep('SOURCE')} 
+            aria-label="Back to Source Selection"
+            className="hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-3 h-3" />
+          </button>
           {data.source === 'etherscan' ? 'Etherscan Details' : 'Local File Details'}
         </div>
 
@@ -108,11 +126,13 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
           <input
             type="text"
             placeholder="Contract Address"
+            aria-label="Contract Address"
             className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white focus:outline-none focus:border-white/20"
             value={data.address}
             onChange={(e) => setData(prev => ({ ...prev, address: e.target.value }))}
           />
           <select
+            aria-label="Target Network"
             className="w-full bg-black/40 border border-white/5 p-3 text-[11px] font-mono text-white appearance-none"
             value={data.network}
             onChange={(e) => setData(prev => ({ ...prev, network: e.target.value }))}
@@ -120,7 +140,6 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
             <option value="ethereum">Ethereum Mainnet</option>
           </select>
         </div>
-
         {data.source === 'file' ? (
           <div
             onDragOver={handleDragOver}
@@ -175,6 +194,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
               <div className="text-[10px] font-mono text-white flex-1 truncate">{v.name} <span className="text-[9px] text-white/30">({v.type})</span></div>
               <input
                 placeholder="0x Hash"
+                aria-label={`Storage slot for variable ${v.name}`}
                 className="w-32 bg-black/60 border border-white/10 p-1.5 text-[9px] font-mono text-white focus:border-white/30 outline-none"
                 value={data.mappings[v.name] || ''}
                 onChange={(e) => setData(prev => ({
@@ -206,7 +226,7 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
       </div>
       <div className="p-6">
         <div className="font-mono text-[11px] text-white/60 mb-1">
-          {data.address ? `${data.address.slice(0, 10)}...${data.address.slice(-8)}` : 'No Address Provided'}
+          {data.address ? `${data.address.slice(0, 10)}…${data.address.slice(-8)}` : 'No Address Provided'}
         </div>
         <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
           {Object.keys(data.mappings).length} Variables Mapped
@@ -231,18 +251,6 @@ export function AddNewContractNode({ id, data: initialData }: { id: string, data
     <div className="relative w-96 bg-[#1b1b1b]/90 backdrop-blur-md border border-white/10 shadow-2xl rounded-none group">
       {renderHeader()}
       {step === 'SOURCE' && renderSourceStep()}
-      {step === 'INPUT' && renderInputStep()}
-      {step === 'MAPPING' && renderMappingStep()}
-      {step === 'SAVED' && renderSavedStep()}
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all right-[-6px]"
-      />
-    </div>
-  );
-}
-()}
       {step === 'INPUT' && renderInputStep()}
       {step === 'MAPPING' && renderMappingStep()}
       {step === 'SAVED' && renderSavedStep()}

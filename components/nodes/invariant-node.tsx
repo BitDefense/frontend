@@ -6,7 +6,7 @@ import { Handle, Position, useHandleConnections, useNodesData, useReactFlow } fr
 
 export type InvariantStep = 'SELECT_VAR' | 'VARIABLE_TYPE' | 'OPERATOR' | 'THRESHOLD' | 'SAVED';
 
-export function InvariantNode({ id, data: initialData }: { id: string, data: any }) {
+export function InvariantNode({ id, data: initialData, onSave }: { id: string, data: any, onSave?: (data: any) => Promise<void> }) {
   const [step, setStep] = useState<InvariantStep>(initialData?.step || 'SELECT_VAR');
   const [selectedVar, setSelectedVar] = useState<string | null>(initialData?.selectedVar || null);
   const [selectedVarType, setSelectedVarType] = useState<string | null>(initialData?.selectedVarType || null);
@@ -36,6 +36,23 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
       })
     );
   }, [id, selectedVar, selectedVarType, operator, threshold, step, setNodes]);
+
+  const handleSave = async () => {
+    if (onSave) {
+      try {
+        await onSave({
+          selectedVar,
+          selectedVarType,
+          operator,
+          threshold
+        });
+      } catch (e) {
+        console.error('Save failed:', e);
+        return;
+      }
+    }
+    setStep('SAVED');
+  };
 
   const connections = useHandleConnections({
     type: 'target',
@@ -88,6 +105,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-2 px-1">
           <button
             onClick={() => setStep('SELECT_VAR')}
+            aria-label="Back to Variable Selection"
             className="hover:text-white transition-colors p-1 -ml-1"
           >
             <ArrowLeft className="w-3 h-3" />
@@ -117,6 +135,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#919191] mb-4 px-1">
         <button
           onClick={() => setStep('OPERATOR')}
+          aria-label="Back to Operator Selection"
           className="hover:text-white transition-colors p-1 -ml-1"
         >
           <ArrowLeft className="w-3 h-3" />
@@ -130,6 +149,7 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
         <input
           type="text"
           placeholder="0.0"
+          aria-label="Threshold Value"
           className="w-full bg-black/40 border border-white/10 p-3 pl-10 text-[11px] font-mono text-white focus:outline-none focus:border-white/30"
           value={threshold || ''}
           onChange={(e) => setThreshold(e.target.value)}
@@ -197,19 +217,6 @@ export function InvariantNode({ id, data: initialData }: { id: string, data: any
       <div className="min-h-[120px]">
         {step === 'SELECT_VAR' && renderSelectVar()}
         {step === 'OPERATOR' && renderSelectOperator()}
-        {step === 'THRESHOLD' && renderSetThreshold()}
-        {step === 'SAVED' && renderSaved()}
-      </div>
-
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 bg-[#131313] border border-white !rounded-none hover:bg-white hover:scale-150 transition-all right-[-6px]"
-      />
-    </div>
-  );
-}
-ectOperator()}
         {step === 'THRESHOLD' && renderSetThreshold()}
         {step === 'SAVED' && renderSaved()}
       </div>

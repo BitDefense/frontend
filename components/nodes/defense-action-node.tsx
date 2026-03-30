@@ -6,7 +6,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 
 export type DefenseStep = 'SELECT_TYPE' | 'TELEGRAM_CONFIG' | 'PAUSE_ROLE' | 'PAUSE_FUNCTION' | 'SAVED';
 
-export function DefenseActionNode({ id, data: initialData }: { id: string, data: any }) {
+export function DefenseActionNode({ id, data: initialData, onSave }: { id: string, data: any, onSave?: (data: any) => Promise<void> }) {
   const [step, setStep] = useState<DefenseStep>(initialData?.step || 'SELECT_TYPE');
   const [actionType, setActionType] = useState<string | null>(initialData?.actionType || null);
   const [params, setParams] = useState<Record<string, any>>(initialData?.params || {});
@@ -32,6 +32,21 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
       })
     );
   }, [id, actionType, params, step, setNodes]);
+
+  const handleSave = async () => {
+    if (onSave) {
+      try {
+        await onSave({
+          actionType,
+          params
+        });
+      } catch (e) {
+        console.error('Save failed:', e);
+        return;
+      }
+    }
+    setStep('SAVED');
+  };
 
   const renderSelectType = () => (
     <div className="p-6 space-y-4">
@@ -79,6 +94,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
       <div className="flex items-center gap-2 mb-2">
         <button
           onClick={() => setStep('SELECT_TYPE')}
+          aria-label="Back to Action Type Selection"
           className="text-[#919191] hover:text-white transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -92,8 +108,9 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
           <input
             type="text"
             value={params.botToken || ''}
+            aria-label="Telegram Bot Token"
             onChange={(e) => setParams({ ...params, botToken: e.target.value })}
-            placeholder="728471...:AAH_..."
+            placeholder="728471…:AAH_…"
             className="w-full bg-[#131313] border border-white/10 px-3 py-2 text-[11px] font-mono text-white focus:outline-none focus:border-red-500/50 transition-colors"
           />
         </div>
@@ -103,6 +120,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
           <input
             type="text"
             value={params.chatId || ''}
+            aria-label="Telegram Chat ID"
             onChange={(e) => setParams({ ...params, chatId: e.target.value })}
             placeholder="-100123456789"
             className="w-full bg-[#131313] border border-white/10 px-3 py-2 text-[11px] font-mono text-white focus:outline-none focus:border-red-500/50 transition-colors"
@@ -110,7 +128,7 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
         </div>
 
         <button
-          onClick={() => setStep('SAVED')}
+          onClick={handleSave}
           disabled={!params.botToken || !params.chatId}
           className="w-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 py-2.5 transition-all group/save disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -270,16 +288,6 @@ export function DefenseActionNode({ id, data: initialData }: { id: string, data:
       )}
 
       <div className="min-h-[100px]">
-        {step === 'SELECT_TYPE' && renderSelectType()}
-        {step === 'TELEGRAM_CONFIG' && renderTelegramConfig()}
-        {step === 'PAUSE_ROLE' && renderPauseRole()}
-        {step === 'PAUSE_FUNCTION' && renderPauseFunction()}
-        {step === 'SAVED' && renderSaved()}
-      </div>
-    </div>
-  );
-}
-lassName="min-h-[100px]">
         {step === 'SELECT_TYPE' && renderSelectType()}
         {step === 'TELEGRAM_CONFIG' && renderTelegramConfig()}
         {step === 'PAUSE_ROLE' && renderPauseRole()}
