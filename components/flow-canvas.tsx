@@ -239,6 +239,26 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
     });
   }, [handleUnlinkNodes]);
 
+  const onNodesDelete = useCallback(async (deletedNodes: any[]) => {
+    for (const node of deletedNodes) {
+      const backendId = node.data?.backendId;
+      if (!backendId) continue;
+
+      try {
+        if (node.type === 'addNewContract') {
+          await api.deleteContract(backendId);
+        } else if (node.type === 'invariant') {
+          await api.deleteInvariant(backendId);
+        } else if (node.type === 'defenseAction') {
+          await api.deleteDefenseAction(backendId);
+        }
+        console.log(`Deleted node ${node.id} from backend (ID: ${backendId})`);
+      } catch (e) {
+        console.error(`Failed to delete node ${node.id} from backend:`, e);
+      }
+    }
+  }, []);
+
   const onPaneContextMenu = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
@@ -328,6 +348,7 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onEdgesDelete={onEdgesDelete}
+        onNodesDelete={onNodesDelete}
         onConnectStart={onConnectStart}
         onConnectEnd={onConnectEnd}
         onPaneContextMenu={onPaneContextMenu}
