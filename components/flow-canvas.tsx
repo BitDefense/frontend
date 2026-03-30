@@ -31,15 +31,15 @@ function FlowCanvasInner() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' | 'invariant' } | null>(null);
   const [connectingNode, setConnectingNode] = useState<string | null>(null);
-  const { screenToFlowPosition, getNode } = useReactFlow();
+  const { screenToFlowPosition, getNode, getEdges } = useReactFlow();
 
-  const handleLinkNodes = useCallback(async (sourceId: string, targetId: string) => {
+  const handleLinkNodes = useCallback(async (sourceId: string, targetId: string, overrideBackendId?: { id: string, backendId: number }) => {
     const sourceNode = getNode(sourceId);
     const targetNode = getNode(targetId);
     if (!sourceNode || !targetNode) return;
 
-    const sourceBackendId = sourceNode.data?.backendId;
-    const targetBackendId = targetNode.data?.backendId;
+    const sourceBackendId = overrideBackendId?.id === sourceId ? overrideBackendId.backendId : sourceNode.data?.backendId;
+    const targetBackendId = overrideBackendId?.id === targetId ? overrideBackendId.backendId : targetNode.data?.backendId;
 
     if (!sourceBackendId || !targetBackendId) return;
 
@@ -94,11 +94,16 @@ function FlowCanvasInner() {
           await api.linkDashboardContract(1, result.id);
         }
       } else if (node.type === 'invariant') {
+        // Find parent contract node to get address
+        const parentEdge = getEdges().find(e => e.target === nodeId);
+        const parentNode = parentEdge ? getNode(parentEdge.source) : null;
+        const contractAddress = parentNode?.data?.address || '0x0';
+
         result = await api.saveInvariant({
-          contract: data.selectedVar, // Placeholder mapping
-          type: 'threshold',
-          target: data.selectedVar,
-          storage: '0x0', // Placeholder
+          contract: contractAddress,
+          type: data.operator, // Use the comparison symbol
+          target: data.threshold, // Threshold value
+          storage: '0x0',
           slot_type: data.selectedVarType,
           network: 'ethereum'
         }, backendId);
@@ -106,19 +111,28 @@ function FlowCanvasInner() {
         result = await api.saveDefenseAction({
           type: data.actionType,
           network: 'ethereum',
-          tg_api_key: data.params.botToken,
-          tg_chat_id: data.params.chatId,
+          tg_api_key: data.params.botToken || null,
+          tg_chat_id: data.params.chatId || null,
+          role_id: data.params.roleAddress || null,
+          function_sig: data.params.functionHex || null,
+          calldata: data.params.args || null,
         }, backendId);
       }
 
       if (result?.id) {
         setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, backendId: result.id } } : n));
+        
+        // Link existing connections if both nodes now have backend IDs
+        const connectedEdges = getEdges().filter(edge => edge.source === nodeId || edge.target === nodeId);
+        connectedEdges.forEach(edge => {
+          handleLinkNodes(edge.source, edge.target, { id: nodeId, backendId: result.id });
+        });
       }
     } catch (e) {
       console.error(`Failed to save node ${nodeId}:`, e);
-      throw e; // Re-throw to let the node handle UI state if needed
+      throw e;
     }
-  }, [getNode, setNodes]);
+  }, [getNode, getEdges, setNodes, handleLinkNodes]);
 
   const nodeTypes = useMemo(() => ({
     addNewContract: (props: any) => <AddNewContractNode {...props} onSave={(data: any) => onNodeSave(props.id, data)} />,
