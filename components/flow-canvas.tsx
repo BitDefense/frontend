@@ -40,11 +40,25 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
     // Map Contracts
     initialData.contracts?.forEach((c: any, i: number) => {
       const nodeId = `contract-${c.id}`;
+      
+      // Transform backend variables (mappings) to frontend variables list
+      // Note: Backend stores storage slot mappings in the "variables" field
+      const frontendVariables = Object.entries(c.variables || {}).map(([name, val]) => ({
+        name,
+        type: 'uint256' // Default type for display, as backend currently stores slot mappings
+      }));
+
       newNodes.push({
         id: nodeId,
         type: 'addNewContract',
         position: { x: 100, y: 100 + i * 400 },
-        data: { ...c, backendId: c.id, step: 'SAVED' }
+        data: { 
+          ...c, 
+          backendId: c.id, 
+          step: 'SAVED',
+          mappings: c.variables || {}, // Map backend variables to frontend mappings
+          variables: frontendVariables // Populate variables array for display
+        }
       });
 
       // Map Invariants for this contract
