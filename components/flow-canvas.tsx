@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   ReactFlow,
   addEdge,
@@ -14,16 +14,11 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import { api } from '@/lib/api';
 import { AddNewContractNode } from '@/components/nodes/add-new-contract-node';
 import { InvariantNode } from '@/components/nodes/invariant-node';
 import { DefenseActionNode } from '@/components/nodes/defense-action-node';
 import { ContextMenu } from '@/components/flow/context-menu';
-
-const nodeTypes = {
-  addNewContract: AddNewContractNode,
-  invariant: InvariantNode,
-  defenseAction: DefenseActionNode,
-};
 
 const initialNodes = [
   { id: 'node-1', type: 'addNewContract', position: { x: 100, y: 200 }, data: {} },
@@ -37,6 +32,53 @@ function FlowCanvasInner() {
   const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' | 'invariant' } | null>(null);
   const [connectingNode, setConnectingNode] = useState<string | null>(null);
   const { screenToFlowPosition, getNode } = useReactFlow();
+
+  const onNodeSave = useCallback(async (nodeId: string, data: any) => {
+    const node = getNode(nodeId);
+    if (!node) return;
+
+    let result;
+    const backendId = node.data?.backendId;
+
+    try {
+      if (node.type === 'addNewContract') {
+        result = await api.saveContract({
+          address: data.address,
+          network: data.network,
+          variables: data.variables.reduce((acc: any, v: any) => ({ ...acc, [v.name]: v.type }), {}),
+        }, backendId);
+      } else if (node.type === 'invariant') {
+        result = await api.saveInvariant({
+          contract: data.selectedVar, // Placeholder mapping
+          type: 'threshold',
+          target: data.selectedVar,
+          storage: '0x0', // Placeholder
+          slot_type: data.selectedVarType,
+          network: 'ethereum'
+        }, backendId);
+      } else if (node.type === 'defenseAction') {
+        result = await api.saveDefenseAction({
+          type: data.actionType,
+          network: 'ethereum',
+          tg_api_key: data.params.botToken,
+          tg_chat_id: data.params.chatId,
+        }, backendId);
+      }
+
+      if (result?.id) {
+        setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, backendId: result.id } } : n));
+      }
+    } catch (e) {
+      console.error(`Failed to save node ${nodeId}:`, e);
+      throw e; // Re-throw to let the node handle UI state if needed
+    }
+  }, [getNode, setNodes]);
+
+  const nodeTypes = useMemo(() => ({
+    addNewContract: (props: any) => <AddNewContractNode {...props} onSave={(data: any) => onNodeSave(props.id, data)} />,
+    invariant: (props: any) => <InvariantNode {...props} onSave={(data: any) => onNodeSave(props.id, data)} />,
+    defenseAction: (props: any) => <DefenseActionNode {...props} onSave={(data: any) => onNodeSave(props.id, data)} />,
+  }), [onNodeSave]);
 
   const onConnect = useCallback(
     (params: Connection) => {
