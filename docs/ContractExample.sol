@@ -2,13 +2,23 @@
 pragma solidity ^0.8.0;
 
 contract Example {
-    public uint256 totalSupply;
+    uint256 public totalSupply;
+    bool public paused;
 
     constructor() {
-        totalSupply = 1 ether;
+        totalSupply = 1_000_000;
     }
 
-    function attack(uint256 newTotalSupply) external {
+    function challenge(uint256 newTotalSupply) external {
+        require(!paused);
         totalSupply = newTotalSupply;
+    }
+
+    function pause() external {
+        paused = true;
+    }
+
+    function unpause() external {
+        paused = false;
     }
 }

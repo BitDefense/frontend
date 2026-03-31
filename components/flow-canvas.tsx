@@ -27,24 +27,63 @@ const DEFAULT_NODES: Node[] = [
 
 const DEFAULT_EDGES: Edge[] = [];
 
+interface Contract {
+  id: number;
+  variables: Record<string, any>;
+  invariant_ids?: number[];
+}
+
+interface Invariant {
+  id: number;
+  variable: string;
+  type: string;
+  target: string;
+  slot_type: string;
+  defense_action_ids?: number[];
+}
+
+interface DefenseAction {
+  id: number;
+  type: string;
+  tg_api_key?: string;
+  tg_chat_id?: string;
+  role_id?: string;
+  function_sig?: string;
+  calldata?: string[];
+}
+
+interface InitialData {
+  contracts?: Contract[];
+  invariants?: Invariant[];
+  defense_actions?: DefenseAction[];
+}
+
+type AppNodeData = {
+  backendId?: number;
+  step?: string;
+  [key: string]: any;
+};
+
+type AppNode = Node<AppNodeData>;
+
 /**
  * Helper to transform backend data structure into React Flow nodes and edges.
  * Optimized with Maps for O(N) performance.
  */
-function transformInitialData(initialData: any) {
+function transformInitialData(initialData: InitialData) {
   if (!initialData || (!initialData.contracts?.length && !initialData.invariants?.length && !initialData.defense_actions?.length)) {
-    return { nodes: DEFAULT_NODES, edges: DEFAULT_EDGES };
+    return { nodes: DEFAULT_NODES as AppNode[], edges: DEFAULT_EDGES };
   }
 
-  const newNodes: Node[] = [];
+  const newNodes: AppNode[] = [];
   const newEdges: Edge[] = [];
 
   // Create lookup maps for performance
-  const invariantsMap = new Map(initialData.invariants?.map((inv: any) => [inv.id, inv]));
-  const defenseActionsMap = new Map(initialData.defense_actions?.map((da: any) => [da.id, da]));
+  const invariantsMap = new Map<number, Invariant>(initialData.invariants?.map((inv: Invariant) => [inv.id, inv]));
+  const defenseActionsMap = new Map<number, DefenseAction>(initialData.defense_actions?.map((da: DefenseAction) => [da.id, da]));
 
   // Map Contracts
-  initialData.contracts?.forEach((c: any, i: number) => {
+  initialData.contracts?.forEach((c: Contract, i: number) => {
     const nodeId = `contract-${c.id}`;
 
     // Transform backend variables (mappings) to frontend variables list
@@ -134,16 +173,16 @@ function transformInitialData(initialData: any) {
   return { nodes: newNodes, edges: newEdges };
 }
 
-function FlowCanvasInner({ initialData }: { initialData?: any }) {
+function FlowCanvasInner({ initialData }: { initialData?: InitialData }) {
   // Compute initial state from data to avoid hydration flickers
-  const transformedInitial = useMemo(() => transformInitialData(initialData), [initialData]);
+  const transformedInitial = useMemo(() => transformInitialData(initialData || {}), [initialData]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(transformedInitial.nodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>(transformedInitial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(transformedInitial.edges);
   const [menu, setMenu] = useState<{ x: number; y: number; filter: 'canvas' | 'contract' | 'invariant' } | null>(null);
   const [connectingNode, setConnectingNode] = useState<string | null>(null);
 
-  const { screenToFlowPosition, getNode, getEdges } = useReactFlow();
+  const { screenToFlowPosition, getNode, getEdges } = useReactFlow<AppNode>();
 
   // Sync state if initialData changes after mount
   useEffect(() => {
@@ -159,16 +198,16 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
     const targetNode = getNode(targetId);
     if (!sourceNode || !targetNode) return;
 
-    const sourceBackendId = overrideBackendId?.id === sourceId ? overrideBackendId.backendId : sourceNode.data?.backendId;
-    const targetBackendId = overrideBackendId?.id === targetId ? overrideBackendId.backendId : targetNode.data?.backendId;
+    const sourceBackendId = overrideBackendId?.id === sourceId ? overrideBackendId.backendId : sourceNode.data.backendId;
+    const targetBackendId = overrideBackendId?.id === targetId ? overrideBackendId.backendId : targetNode.data.backendId;
 
     if (!sourceBackendId || !targetBackendId) return;
 
     try {
       if (sourceNode.type === 'addNewContract' && targetNode.type === 'invariant') {
-        await api.linkContractInvariant(sourceBackendId, targetBackendId);
+        await api.linkContractInvariant(sourceBackendId as number, targetBackendId as number);
       } else if (sourceNode.type === 'invariant' && targetNode.type === 'defenseAction') {
-        await api.linkInvariantAction(sourceBackendId, targetBackendId);
+        await api.linkInvariantAction(sourceBackendId as number, targetBackendId as number);
       }
     } catch (e) {
       console.error('Failed to link nodes:', e);
@@ -180,16 +219,16 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
     const targetNode = getNode(targetId);
     if (!sourceNode || !targetNode) return;
 
-    const sourceBackendId = sourceNode.data?.backendId;
-    const targetBackendId = targetNode.data?.backendId;
+    const sourceBackendId = sourceNode.data.backendId;
+    const targetBackendId = targetNode.data.backendId;
 
     if (!sourceBackendId || !targetBackendId) return;
 
     try {
       if (sourceNode.type === 'addNewContract' && targetNode.type === 'invariant') {
-        await api.unlinkContractInvariant(sourceBackendId, targetBackendId);
+        await api.unlinkContractInvariant(sourceBackendId as number, targetBackendId as number);
       } else if (sourceNode.type === 'invariant' && targetNode.type === 'defenseAction') {
-        await api.unlinkInvariantAction(sourceBackendId, targetBackendId);
+        await api.unlinkInvariantAction(sourceBackendId as number, targetBackendId as number);
       }
     } catch (e) {
       console.error('Failed to unlink nodes:', e);
@@ -200,8 +239,8 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
     const node = getNode(nodeId);
     if (!node) return;
 
-    let result;
-    const backendId = node.data?.backendId;
+    let result: any;
+    const backendId = node.data.backendId;
 
     try {
       if (node.type === 'addNewContract') {
@@ -280,10 +319,10 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
     });
   }, [handleUnlinkNodes]);
 
-  const onNodesDelete = useCallback(async (deletedNodes: Node[]) => {
-    for (const node of deletedNodes) {
-      const backendId = (node.data as any)?.backendId;
-      if (!backendId) continue;
+  const onNodesDelete = useCallback(async (deletedNodes: AppNode[]) => {
+    await Promise.all(deletedNodes.map(async (node) => {
+      const backendId = node.data.backendId;
+      if (!backendId) return;
 
       try {
         if (node.type === 'addNewContract') {
@@ -296,15 +335,15 @@ function FlowCanvasInner({ initialData }: { initialData?: any }) {
       } catch (e) {
         console.error(`Failed to delete node ${node.id} (Backend ID: ${backendId}):`, e);
       }
-    }
+    }));
   }, []);
 
   const onPaneContextMenu = useCallback(
-    (event: React.MouseEvent) => {
+    (event: React.MouseEvent | MouseEvent) => {
       event.preventDefault();
       setMenu({
-        x: event.clientX,
-        y: event.clientY,
+        x: (event as MouseEvent).clientX ?? (event as React.MouseEvent).clientX,
+        y: (event as MouseEvent).clientY ?? (event as React.MouseEvent).clientY,
         filter: 'canvas',
       });
       setConnectingNode(null);
