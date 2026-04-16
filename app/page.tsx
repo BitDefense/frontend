@@ -2,6 +2,7 @@ import React from 'react';
 import { Sora, JetBrains_Mono } from 'next/font/google';
 import { Navigation } from '@/components/navigation';
 import { Hero } from '@/components/hero';
+import { VideoDemo } from '@/components/video-demo';
 import { Workflow } from '@/components/workflow';
 import { Protocols } from '@/components/protocols';
 import { Footer } from '@/components/footer';
@@ -29,6 +30,7 @@ export default function TacticalSecurityLanding() {
       <Pulse />
       <Navigation />
       <Hero />
+      <VideoDemo />
       <Workflow />
       <Protocols />
       <Footer />

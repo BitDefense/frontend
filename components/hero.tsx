@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export function Hero() {
   return (
     <section className="px-6 py-24 md:px-12 md:py-32 max-w-[1600px] mx-auto relative">
@@ -21,12 +19,19 @@ export function Hero() {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4">
-          <Link href="/dashboard" className="inline-block bg-white text-[#131313] px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors">
-            Launch Dashboard
-          </Link>
-          <button className="border border-white/20 px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-colors">
-            View Docs
+          <button 
+            disabled 
+            className="inline-block bg-neutral-800 text-neutral-500 px-8 py-4 text-sm font-bold uppercase tracking-widest cursor-not-allowed group relative overflow-hidden min-w-[200px]"
+          >
+            <span className="group-hover:opacity-0 transition-opacity">Launch Dashboard</span>
+            <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">Soon</span>
           </button>
+          <a 
+            href="https://bitdefense.notion.site/BitDefense-3020a3843e7c8040ad5eeb195f9f6c79"
+            className="border border-white/20 px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-colors inline-block"
+          >
+            View Docs
+          </a>
         </div>
       </div>
 
